@@ -1,0 +1,6 @@
+@EcoDeal.Api_HostAddress = http://localhost:5116
+
+GET {{EcoDeal.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
