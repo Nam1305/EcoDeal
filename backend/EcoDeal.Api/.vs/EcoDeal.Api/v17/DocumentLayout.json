@@ -1,14 +1,18 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\EcoDeal\\backend\\backend\\EcoDeal.Api\\",
+  "WorkspaceRootPath": "D:\\Work Space\\EcoDealV2\\backend\\EcoDeal.Api\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\EcoDeal\\backend\\backend\\EcoDeal.Api\\Program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{ABCF855E-5EDD-496C-B3A7-76C20076E534}|EcoDeal.Api\\EcoDeal.Api.csproj|d:\\work space\\ecodealv2\\backend\\ecodeal.api\\ecodeal.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ABCF855E-5EDD-496C-B3A7-76C20076E534}|EcoDeal.Api\\EcoDeal.Api.csproj|solutionrelative:ecodeal.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\EcoDeal\\backend\\backend\\EcoDeal.Api\\EcoDeal.Api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:EcoDeal.Api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+      "AbsoluteMoniker": "D:0:0:{ABCF855E-5EDD-496C-B3A7-76C20076E534}|EcoDeal.Api\\EcoDeal.Api.csproj|d:\\work space\\ecodealv2\\backend\\ecodeal.api\\ecodeal.api\\services\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ABCF855E-5EDD-496C-B3A7-76C20076E534}|EcoDeal.Api\\EcoDeal.Api.csproj|solutionrelative:ecodeal.api\\services\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ABCF855E-5EDD-496C-B3A7-76C20076E534}|EcoDeal.Api\\EcoDeal.Api.csproj|d:\\work space\\ecodealv2\\backend\\ecodeal.api\\ecodeal.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ABCF855E-5EDD-496C-B3A7-76C20076E534}|EcoDeal.Api\\EcoDeal.Api.csproj|solutionrelative:ecodeal.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,32 +22,43 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\EcoDeal\\backend\\backend\\EcoDeal.Api\\Program.cs",
-              "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "D:\\EcoDeal\\backend\\backend\\EcoDeal.Api\\Program.cs",
-              "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAcAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "AuthService.cs",
+              "DocumentMoniker": "D:\\Work Space\\EcoDealV2\\backend\\EcoDeal.Api\\EcoDeal.Api\\Services\\AuthService.cs",
+              "RelativeDocumentMoniker": "EcoDeal.Api\\Services\\AuthService.cs",
+              "ToolTip": "D:\\Work Space\\EcoDealV2\\backend\\EcoDeal.Api\\EcoDeal.Api\\Services\\AuthService.cs",
+              "RelativeToolTip": "EcoDeal.Api\\Services\\AuthService.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAABAAAAA5AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-29T05:35:13.517Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-15T03:46:02.123Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "EcoDeal.Api.csproj",
-              "DocumentMoniker": "D:\\EcoDeal\\backend\\backend\\EcoDeal.Api\\EcoDeal.Api.csproj",
-              "RelativeDocumentMoniker": "EcoDeal.Api.csproj",
-              "ToolTip": "D:\\EcoDeal\\backend\\backend\\EcoDeal.Api\\EcoDeal.Api.csproj",
-              "RelativeToolTip": "EcoDeal.Api.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-01-29T05:35:11.707Z",
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\Work Space\\EcoDealV2\\backend\\EcoDeal.Api\\EcoDeal.Api\\Program.cs",
+              "RelativeDocumentMoniker": "EcoDeal.Api\\Program.cs",
+              "ToolTip": "D:\\Work Space\\EcoDealV2\\backend\\EcoDeal.Api\\EcoDeal.Api\\Program.cs",
+              "RelativeToolTip": "EcoDeal.Api\\Program.cs",
+              "ViewState": "AgIAADgAAAAAAAAAAAAkwE0AAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-15T03:35:37.886Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "D:\\Work Space\\EcoDealV2\\backend\\EcoDeal.Api\\EcoDeal.Api\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "EcoDeal.Api\\Controllers\\AuthController.cs",
+              "ToolTip": "D:\\Work Space\\EcoDealV2\\backend\\EcoDeal.Api\\EcoDeal.Api\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "EcoDeal.Api\\Controllers\\AuthController.cs",
+              "ViewState": "AgIAABwAAAAAAAAAAAAowCkAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-15T03:35:29.918Z",
               "EditorCaption": ""
             }
           ]

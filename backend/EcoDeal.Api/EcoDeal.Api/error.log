@@ -1,0 +1,60 @@
+Using launch settings from D:\Work Space\EcoDealV2\backend\EcoDeal.Api\EcoDeal.Api\Properties\launchSettings.json...
+Building...
+Unhandled exception. System.Reflection.ReflectionTypeLoadException: Unable to load one or more of the requested types.
+Could not load type 'Microsoft.OpenApi.Any.IOpenApiAny' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+Could not load type 'Microsoft.OpenApi.Models.OpenApiDiscriminator' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+Could not load type 'Microsoft.OpenApi.Models.OpenApiExternalDocs' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+Could not load type 'Microsoft.OpenApi.Models.OpenApiReference' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+Could not load type 'Microsoft.OpenApi.Models.OpenApiSchema' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+Could not load type 'Microsoft.OpenApi.Models.OpenApiTag' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+Could not load type 'Microsoft.OpenApi.Models.OpenApiXml' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+Could not load type 'Microsoft.OpenApi.Models.OpenApiDocument' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+Could not load type 'Microsoft.OpenApi.Models.OpenApiPathItem' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+Could not load type 'Microsoft.OpenApi.Models.OpenApiRequestBody' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+Could not load type 'Microsoft.OpenApi.Models.OpenApiRequestBody' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+Could not load type 'Microsoft.OpenApi.Models.OpenApiDocument' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+Could not load type 'Microsoft.OpenApi.Models.OpenApiPaths' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+Could not load type 'Microsoft.OpenApi.Models.OpenApiOperation' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+Could not load type 'Microsoft.OpenApi.Models.OperationType' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+Could not load type 'Microsoft.OpenApi.Models.OpenApiParameter' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+Could not load type 'Microsoft.OpenApi.Models.OpenApiRequestBody' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+Could not load type 'Microsoft.OpenApi.Models.OpenApiResponse' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+Could not load type 'Microsoft.OpenApi.Models.OpenApiResponses' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+Could not load type 'Microsoft.OpenApi.Models.OpenApiSchema' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+Could not load type 'Microsoft.OpenApi.Models.OpenApiDocument' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+   at System.Reflection.RuntimeModule.GetDefinedTypes()
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFeatureProvider.PopulateFeature(IEnumerable`1 parts, ControllerFeature feature)
+   at Microsoft.AspNetCore.Mvc.ApplicationParts.ApplicationPartManager.PopulateFeature[TFeature](TFeature feature)
+   at Microsoft.AspNetCore.Mvc.ApplicationModels.ControllerActionDescriptorProvider.GetControllerTypes()
+   at Microsoft.AspNetCore.Mvc.ApplicationModels.ControllerActionDescriptorProvider.GetDescriptors()
+   at Microsoft.AspNetCore.Mvc.ApplicationModels.ControllerActionDescriptorProvider.OnProvidersExecuting(ActionDescriptorProviderContext context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.DefaultActionDescriptorCollectionProvider.UpdateCollection()
+   at Microsoft.AspNetCore.Mvc.Infrastructure.DefaultActionDescriptorCollectionProvider.Initialize()
+   at Microsoft.AspNetCore.Mvc.Infrastructure.DefaultActionDescriptorCollectionProvider.GetChangeToken()
+   at Microsoft.Extensions.Primitives.ChangeToken.ChangeTokenRegistration`1..ctor(Func`1 changeTokenProducer, Action`1 changeTokenConsumer, TState state)
+   at Microsoft.Extensions.Primitives.ChangeToken.OnChange(Func`1 changeTokenProducer, Action changeTokenConsumer)
+   at Microsoft.AspNetCore.Mvc.Routing.ActionEndpointDataSourceBase.Subscribe()
+   at Microsoft.AspNetCore.Builder.ControllerEndpointRouteBuilderExtensions.GetOrCreateDataSource(IEndpointRouteBuilder endpoints)
+   at Microsoft.AspNetCore.Builder.ControllerEndpointRouteBuilderExtensions.MapControllers(IEndpointRouteBuilder endpoints)
+   at Program.<Main>$(String[] args) in D:\Work Space\EcoDealV2\backend\EcoDeal.Api\EcoDeal.Api\Program.cs:line 83
+System.TypeLoadException: Could not load type 'Microsoft.OpenApi.Any.IOpenApiAny' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+System.TypeLoadException: Could not load type 'Microsoft.OpenApi.Models.OpenApiDiscriminator' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+System.TypeLoadException: Could not load type 'Microsoft.OpenApi.Models.OpenApiExternalDocs' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+System.TypeLoadException: Could not load type 'Microsoft.OpenApi.Models.OpenApiReference' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+System.TypeLoadException: Could not load type 'Microsoft.OpenApi.Models.OpenApiSchema' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+System.TypeLoadException: Could not load type 'Microsoft.OpenApi.Models.OpenApiTag' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+System.TypeLoadException: Could not load type 'Microsoft.OpenApi.Models.OpenApiXml' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+System.TypeLoadException: Could not load type 'Microsoft.OpenApi.Models.OpenApiDocument' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+System.TypeLoadException: Could not load type 'Microsoft.OpenApi.Models.OpenApiPathItem' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+System.TypeLoadException: Could not load type 'Microsoft.OpenApi.Models.OpenApiRequestBody' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+System.TypeLoadException: Could not load type 'Microsoft.OpenApi.Models.OpenApiRequestBody' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+System.TypeLoadException: Could not load type 'Microsoft.OpenApi.Models.OpenApiDocument' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+System.TypeLoadException: Could not load type 'Microsoft.OpenApi.Models.OpenApiPaths' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+System.TypeLoadException: Could not load type 'Microsoft.OpenApi.Models.OpenApiOperation' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+System.TypeLoadException: Could not load type 'Microsoft.OpenApi.Models.OperationType' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+System.TypeLoadException: Could not load type 'Microsoft.OpenApi.Models.OpenApiParameter' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+System.TypeLoadException: Could not load type 'Microsoft.OpenApi.Models.OpenApiRequestBody' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+System.TypeLoadException: Could not load type 'Microsoft.OpenApi.Models.OpenApiResponse' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+System.TypeLoadException: Could not load type 'Microsoft.OpenApi.Models.OpenApiResponses' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+System.TypeLoadException: Could not load type 'Microsoft.OpenApi.Models.OpenApiSchema' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+System.TypeLoadException: Could not load type 'Microsoft.OpenApi.Models.OpenApiDocument' from assembly 'Microsoft.OpenApi, Version=2.4.1.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
