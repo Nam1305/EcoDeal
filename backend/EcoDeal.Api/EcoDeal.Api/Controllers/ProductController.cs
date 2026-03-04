@@ -63,6 +63,13 @@ namespace EcoDeal.Api.Controllers
             return Ok(products);
         }
 
+        [HttpGet("store/{storeId}")]
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetByStoreId(int storeId)
+        {
+            var products = await _productService.GetProductsByStoreIdAsync(storeId);
+            return Ok(products);
+        }
+
         //Create product
         [HttpPost]
         public async Task<ActionResult<ProductDto>> Create(CreateProductRequest request)

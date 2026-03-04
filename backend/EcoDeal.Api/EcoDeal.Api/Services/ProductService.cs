@@ -88,6 +88,12 @@ namespace EcoDeal.Api.Services
             return products.Select(MapToDto);
         }
 
+        public async Task<IEnumerable<ProductDto>> GetProductsByStoreIdAsync(int storeId)
+        {
+            var products = await _productRepository.GetByStoreIdAsync(storeId);
+            return products.Select(MapToDto);
+        }
+
         public async Task DeleteProductAsync(int id)
         {
             await _productRepository.DeleteAsync(id);

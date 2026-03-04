@@ -17,6 +17,10 @@ const productService = {
     searchByName: async (name: string) => {
         const response = await api.get<Product[]>(`/Product/search?name=${name}`);
         return response.data;
+    },
+    getByStoreId: async (storeId: number) => {
+        const response = await api.get<Product[]>(`/Product/store/${storeId}`);
+        return response.data;
     }
 };
 

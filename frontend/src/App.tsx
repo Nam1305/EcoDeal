@@ -5,6 +5,7 @@ import Home from './components/Home';
 import Login from './components/Login';
 import Register from './components/Register';
 import ProductDetail from './components/ProductDetail';
+import StoreDetail from './components/StoreDetail';
 import './App.css';
 
 import Navbar from './components/Navbar';
@@ -22,6 +23,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/store/:id" element={<StoreDetail />} />
         </Routes>
       </div>
     </Router>

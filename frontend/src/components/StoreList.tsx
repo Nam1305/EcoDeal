@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import Footer from './Footer';
 import storeService from '../services/storeService';
 import type { Store, PagedResponse } from '../types';
 
@@ -163,12 +165,15 @@ const StoreList: React.FC = () => {
                                 </div>
 
                                 <div className="flex items-center justify-end">
-                                    <button className="bg-gray-50 hover:bg-green-600 hover:text-white text-green-600 px-6 py-3 rounded-2xl font-bold transition flex items-center border border-gray-100 group-hover:border-transparent">
+                                    <Link
+                                        to={`/store/${store.storeId}`}
+                                        className="bg-gray-50 hover:bg-green-600 hover:text-white text-green-600 px-6 py-3 rounded-2xl font-bold transition flex items-center border border-gray-100 group-hover:border-transparent"
+                                    >
                                         Visit Store
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                         </svg>
-                                    </button>
+                                    </Link>
                                 </div>
                             </div>
                         ))}
@@ -224,6 +229,7 @@ const StoreList: React.FC = () => {
                     </div>
                 )}
             </div>
+            <Footer />
         </div>
     );
 };

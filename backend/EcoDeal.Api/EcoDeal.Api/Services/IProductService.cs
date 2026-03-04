@@ -10,6 +10,7 @@ namespace EcoDeal.Api.Services
         Task<PagedResponse<ProductDto>> GetPagedProductsAsync(int pageNumber, int pageSize);
         Task<ProductDto> CreateProductAsync(CreateProductRequest request);
         Task<IEnumerable<ProductDto>> SearchProductsByNameAsync(string name);
+        Task<IEnumerable<ProductDto>> GetProductsByStoreIdAsync(int storeId);
         Task UpdateProductAsync(int id, UpdateProductRequest request);
         Task DeleteProductAsync(int id);
     }
