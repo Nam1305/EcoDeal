@@ -12,5 +12,6 @@ namespace EcoDeal.Api.Services
         Task<StoreDto> AddStoreAsync(CreateStoreRequest request, int userId);
         Task UpdateStoreAsync(int id, UpdateStoreRequest request);
         Task DeleteStoreAsync(int id);
+        Task<StoreDto?> GetStoreByUserIdAsync(int userId);
     }
 }

@@ -21,6 +21,10 @@ const storeService = {
     filterByApproval: async (isApproved: boolean) => {
         const response = await api.get<Store[]>(`/Store/filter?isApproved=${isApproved}`);
         return response.data;
+    },
+    getMyStore: async () => {
+        const response = await api.get<Store>('/Store/my-store');
+        return response.data;
     }
 };
 

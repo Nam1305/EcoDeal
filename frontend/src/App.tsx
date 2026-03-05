@@ -6,6 +6,9 @@ import Login from './components/Login';
 import Register from './components/Register';
 import ProductDetail from './components/ProductDetail';
 import StoreDetail from './components/StoreDetail';
+import StoreOwnerDashboard from './components/StoreOwnerDashboard';
+import ProductManagement from './components/ProductManagement';
+import UserProfile from './components/UserProfile';
 import './App.css';
 
 import Navbar from './components/Navbar';
@@ -24,6 +27,9 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/store/:id" element={<StoreDetail />} />
+          <Route path="/store-owner-dashboard" element={<StoreOwnerDashboard />} />
+          <Route path="/manage-products" element={<ProductManagement />} />
+          <Route path="/profile" element={<UserProfile />} />
         </Routes>
       </div>
     </Router>

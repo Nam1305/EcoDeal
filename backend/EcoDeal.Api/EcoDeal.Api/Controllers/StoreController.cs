@@ -22,6 +22,20 @@ namespace EcoDeal.Api.Controllers
             return Ok(response);
         }
 
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        [HttpGet("my-store")]
+        public async Task<ActionResult<StoreDto>> GetMyStore()
+        {
+            var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(userIdString, out int userId))
+            {
+                var store = await _storeService.GetStoreByUserIdAsync(userId);
+                if (store == null) return NotFound(new { message = "You do not have a registered store." });
+                return Ok(store);
+            }
+            return Unauthorized();
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<StoreDto>> GetById(int id)
         {

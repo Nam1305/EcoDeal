@@ -17,7 +17,15 @@ const Login: React.FC = () => {
 
         try {
             await login({ email, password });
-            navigate('/');
+
+            // Check the current user's role from authService since login context is updated asynchronously
+            const user = (await import('../services/authService')).default.getCurrentUser();
+
+            if (user?.role === 'StoreOwner') {
+                navigate('/store-owner-dashboard');
+            } else {
+                navigate('/');
+            }
         } catch (err: any) {
             setError(err.response?.data?.message || 'Invalid email or password');
         } finally {

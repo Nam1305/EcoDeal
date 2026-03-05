@@ -29,7 +29,15 @@ const Navbar: React.FC = () => {
                 <div className="flex items-center space-x-4">
                     {user ? (
                         <div className="flex items-center space-x-4">
-                            <span className="text-gray-700 font-medium">Hi, {user.fullName}</span>
+                            {user.role === 'StoreOwner' && (
+                                <>
+                                    <Link to="/store-owner-dashboard" className="text-gray-700 hover:text-green-600 font-medium transition">Dashboard</Link>
+                                    <Link to="/manage-products" className="text-gray-700 hover:text-green-600 font-medium transition">Manage Products</Link>
+                                </>
+                            )}
+                            <Link to="/profile" className="text-gray-700 hover:text-green-600 font-medium transition cursor-pointer">
+                                My Profile ({user.fullName})
+                            </Link>
                             <button
                                 onClick={handleLogout}
                                 className="bg-red-50 text-red-600 px-4 py-2 rounded-lg hover:bg-red-100 transition font-medium"

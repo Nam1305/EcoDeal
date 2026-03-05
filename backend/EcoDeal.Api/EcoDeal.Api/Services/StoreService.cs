@@ -84,6 +84,13 @@ namespace EcoDeal.Api.Services
             await _storeRepository.DeleteAsync(id);
         }
 
+        public async Task<StoreDto?> GetStoreByUserIdAsync(int userId)
+        {
+            var stores = await _storeRepository.GetAllAsync();
+            var store = stores.FirstOrDefault(s => s.UserId == userId);
+            return store != null ? MapToDto(store) : null;
+        }
+
         private StoreDto MapToDto(Store store)
         {
             return new StoreDto

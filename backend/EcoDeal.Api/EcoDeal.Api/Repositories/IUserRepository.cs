@@ -10,5 +10,7 @@ namespace EcoDeal.Api.Repositories
         Task<User> CreateAsync(User user);
         //Check if user exists
         Task<bool> ExistsAsync(string email);
+        Task<User?> GetByIdAsync(int id);
+        Task UpdateAsync(User user);
     }
 }
