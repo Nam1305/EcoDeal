@@ -9,17 +9,26 @@ import StoreDetail from './components/StoreDetail';
 import StoreOwnerDashboard from './components/StoreOwnerDashboard';
 import ProductManagement from './components/ProductManagement';
 import UserProfile from './components/UserProfile';
+import Cart from './components/Cart';
+import Checkout from './components/Checkout';
+import CheckoutSuccess from './components/CheckoutSuccess';
+import CheckoutCancel from './components/CheckoutCancel';
+import OrderHistory from './components/OrderHistory';
+import OrderDetail from './components/OrderDetail';
 import './App.css';
 
 import Navbar from './components/Navbar';
+import { CartProvider } from './context/CartContext';
 
 function App() {
   return (
     <Router>
-      <div className="App">
-        <Navbar />
-
-        <Routes>
+        <CartProvider>
+          <div className="App min-h-screen bg-gray-50 flex flex-col">
+            <Navbar />
+            
+            <main className="flex-grow">
+              <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/stores" element={<StoreList />} />
           <Route path="/users" element={<UserList />} />
@@ -28,10 +37,18 @@ function App() {
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/store/:id" element={<StoreDetail />} />
           <Route path="/store-owner-dashboard" element={<StoreOwnerDashboard />} />
-          <Route path="/manage-products" element={<ProductManagement />} />
-          <Route path="/profile" element={<UserProfile />} />
-        </Routes>
-      </div>
+                <Route path="/manage-products" element={<ProductManagement />} />
+                <Route path="/profile" element={<UserProfile />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/checkout/success" element={<CheckoutSuccess />} />
+                <Route path="/checkout/cancel" element={<CheckoutCancel />} />
+                <Route path="/orders" element={<OrderHistory />} />
+                <Route path="/orders/:id" element={<OrderDetail />} />
+              </Routes>
+            </main>
+          </div>
+        </CartProvider>
     </Router>
   );
 }

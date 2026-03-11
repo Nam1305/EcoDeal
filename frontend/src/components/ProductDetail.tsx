@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import productService from '../services/productService';
+import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import type { Product } from '../types';
 
 const ProductDetail: React.FC = () => {
@@ -10,6 +12,9 @@ const ProductDetail: React.FC = () => {
     const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { addToCart } = useCart();
+    const { user } = useAuth();
+    const [adding, setAdding] = useState(false);
 
     useEffect(() => {
         const fetchProductData = async () => {
@@ -34,8 +39,22 @@ const ProductDetail: React.FC = () => {
         fetchProductData();
     }, [id]);
 
-    const handleBuyNow = () => {
-        alert(`Thank you for your interest in ${product?.productName}! This feature is coming soon.`);
+    const handleAddToCart = async () => {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+        if (!product) return;
+        
+        setAdding(true);
+        try {
+            await addToCart(product.productId, 1);
+            alert(`${product.productName} added to cart successfully!`);
+        } catch (err) {
+            alert('Failed to add product to cart.');
+        } finally {
+            setAdding(false);
+        }
     };
 
     if (loading) {
@@ -193,13 +212,16 @@ const ProductDetail: React.FC = () => {
                                     </div>
 
                                     <button
-                                        onClick={handleBuyNow}
-                                        className="w-full bg-green-600 text-white py-5 rounded-2xl font-black text-xl shadow-xl shadow-green-200 hover:bg-green-700 hover:-translate-y-1 transition duration-300 flex items-center justify-center group"
+                                        onClick={handleAddToCart}
+                                        disabled={adding || product.stockQuantity === 0}
+                                        className="w-full bg-green-600 text-white py-5 rounded-2xl font-black text-xl shadow-xl shadow-green-200 hover:bg-green-700 hover:-translate-y-1 transition duration-300 flex items-center justify-center group disabled:bg-gray-400 disabled:shadow-none disabled:transform-none"
                                     >
-                                        <span>RESERVE & BUY NOW</span>
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 h-6 w-6 group-hover:translate-x-1 transition duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                        </svg>
+                                        <span>{adding ? 'ADDING...' : (product.stockQuantity === 0 ? 'OUT OF STOCK' : 'ADD TO CART')}</span>
+                                        {!adding && product.stockQuantity > 0 && (
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 h-6 w-6 group-hover:translate-x-1 transition duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                            </svg>
+                                        )}
                                     </button>
                                 </div>
                             </div>

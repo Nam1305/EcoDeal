@@ -15,6 +15,10 @@ public partial class EcoDealContext : DbContext
     {
     }
 
+    public virtual DbSet<Cart> Carts { get; set; }
+
+    public virtual DbSet<CartItem> CartItems { get; set; }
+
     public virtual DbSet<Category> Categories { get; set; }
 
     public virtual DbSet<Order> Orders { get; set; }
@@ -36,6 +40,48 @@ public partial class EcoDealContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Cart>(entity =>
+        {
+            entity.HasKey(e => e.CartId).HasName("PK__Cart__FC520D8DB3D201A9");
+
+            entity.ToTable("Cart");
+
+            entity.HasIndex(e => e.UserId, "UQ_Cart_User").IsUnique();
+
+            entity.Property(e => e.CartId).HasColumnName("CartID");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+
+            entity.HasOne(d => d.User).WithOne(p => p.Cart)
+                .HasForeignKey<Cart>(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Cart_User");
+        });
+
+        modelBuilder.Entity<CartItem>(entity =>
+        {
+            entity.HasKey(e => e.CartItemId).HasName("PK__CartItem__488B0B2AC9314488");
+
+            entity.Property(e => e.CartItemId).HasColumnName("CartItemID");
+            entity.Property(e => e.AddedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.CartId).HasColumnName("CartID");
+            entity.Property(e => e.ProductId).HasColumnName("ProductID");
+            entity.Property(e => e.Quantity).HasDefaultValue(1);
+
+            entity.HasOne(d => d.Cart).WithMany(p => p.CartItems)
+                .HasForeignKey(d => d.CartId)
+                .HasConstraintName("FK_CartItems_Cart");
+
+            entity.HasOne(d => d.Product).WithMany()
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_CartItems_Product");
+        });
+
         modelBuilder.Entity<Category>(entity =>
         {
             entity.HasKey(e => e.CategoryId).HasName("PK__Categori__19093A2BA0FEDAC3");
@@ -54,9 +100,12 @@ public partial class EcoDealContext : DbContext
                 .HasColumnType("datetime");
             entity.Property(e => e.PaymentMethod).HasMaxLength(50);
             entity.Property(e => e.PaymentStatus).HasMaxLength(50);
+            entity.Property(e => e.ShippingAddress).HasMaxLength(500);
+            entity.Property(e => e.ShippingPhone).HasMaxLength(20);
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
                 .HasDefaultValue("Pending");
+            entity.Property(e => e.StripeSessionId).HasMaxLength(255);
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.UserId).HasColumnName("UserID");
 

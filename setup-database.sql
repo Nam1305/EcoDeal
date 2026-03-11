@@ -69,6 +69,9 @@ CREATE TABLE [Orders] (
     Status nvarchar(50) DEFAULT 'Pending', -- 'Pending', 'Paid', 'Completed'
     PaymentStatus nvarchar(50) NULL,
     PaymentMethod nvarchar(50) NULL,
+    StripeSessionId nvarchar(255) NULL,
+    ShippingAddress nvarchar(500) NULL,
+    ShippingPhone nvarchar(20) NULL,
     PRIMARY KEY (OrderID),
     CONSTRAINT FK_Orders_User FOREIGN KEY (UserID) REFERENCES [Users] (UserID)
 );
@@ -82,6 +85,26 @@ CREATE TABLE [OrderDetails] (
     PRIMARY KEY (OrderDetailID),
     CONSTRAINT FK_OrderDetails_Order FOREIGN KEY (OrderID) REFERENCES [Orders] (OrderID),
     CONSTRAINT FK_OrderDetails_Product FOREIGN KEY (ProductID) REFERENCES [Product] (ProductID)
+);
+GO
+CREATE TABLE [Cart] (
+    CartID int IDENTITY(1,1) NOT NULL,
+    UserID int NOT NULL,
+    CreatedAt datetime DEFAULT GETDATE(),
+    PRIMARY KEY (CartID),
+    CONSTRAINT FK_Cart_User FOREIGN KEY (UserID) REFERENCES [Users] (UserID),
+    CONSTRAINT UQ_Cart_User UNIQUE (UserID)
+);
+GO
+CREATE TABLE [CartItems] (
+    CartItemID int IDENTITY(1,1) NOT NULL,
+    CartID int NOT NULL,
+    ProductID int NOT NULL,
+    Quantity int DEFAULT 1,
+    AddedAt datetime DEFAULT GETDATE(),
+    PRIMARY KEY (CartItemID),
+    CONSTRAINT FK_CartItems_Cart FOREIGN KEY (CartID) REFERENCES [Cart] (CartID) ON DELETE CASCADE,
+    CONSTRAINT FK_CartItems_Product FOREIGN KEY (ProductID) REFERENCES [Product] (ProductID)
 );
 GO
 -- 4. INSERT MOCK DATA
@@ -107,6 +130,10 @@ INSERT INTO [Orders] (UserID, TotalAmount, Status, PaymentStatus, PaymentMethod)
 INSERT INTO [OrderDetails] (OrderID, ProductID, Quantity, UnitPrice) VALUES
 (1, 1, 2, 10000),
 (1, 2, 1, 5000);
+-- Cart
+INSERT INTO [Cart] (UserID) VALUES (3); -- UserID 3 is John Doe (Customer)
+-- CartItems (Customer added 1 Fresh Milk)
+INSERT INTO [CartItems] (CartID, ProductID, Quantity) VALUES (1, 3, 1);
 GO
 -- 5. VERIFY
 SELECT * FROM [Users];

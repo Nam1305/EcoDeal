@@ -29,6 +29,10 @@ builder.Services.AddScoped<IStoreService, StoreService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 // Add Swagger/OpenAPI support
 builder.Services.AddEndpointsApiExplorer();
@@ -81,6 +85,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = builder.Configuration["Jwt:Audience"]
         };
     });
+
+// Configure Stripe Setup
+Stripe.StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
 // 5. Add CORS
 builder.Services.AddCors(options =>

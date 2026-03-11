@@ -1,0 +1,16 @@
+# .NET Core
+bin/
+obj/
+
+# Node
+node_modules/
+.env
+dist/
+
+# macOS
+.DS_Store
+
+# IDEs
+.vscode/
+.vs/
+*.user

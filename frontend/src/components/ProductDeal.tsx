@@ -1,11 +1,17 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import productService from '../services/productService';
+import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import type { Product } from '../types';
 
 const ProductDeal: React.FC = () => {
     const [deals, setDeals] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
+    const [addingId, setAddingId] = useState<number | null>(null);
+    const navigate = useNavigate();
+    const { addToCart } = useCart();
+    const { user } = useAuth();
 
     useEffect(() => {
         const fetchDeals = async () => {
@@ -20,6 +26,26 @@ const ProductDeal: React.FC = () => {
         };
         fetchDeals();
     }, []);
+
+    const handleAddToCart = async (e: React.MouseEvent, productId: number) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+
+        setAddingId(productId);
+        try {
+            await addToCart(productId, 1);
+            // Optionally could add a small toast here if desired
+        } catch (error) {
+            console.error('Failed to add to cart:', error);
+        } finally {
+            setAddingId(null);
+        }
+    };
 
     if (loading) return <div className="text-center py-10">Hunting for the best deals...</div>;
 
@@ -64,10 +90,19 @@ const ProductDeal: React.FC = () => {
                                             <span className="text-sm text-gray-400 line-through ml-2">${product.originalPrice}</span>
                                         )}
                                     </div>
-                                    <button className="bg-gray-100 hover:bg-green-600 hover:text-white p-3 rounded-xl transition-all">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                        </svg>
+                                    <button 
+                                        onClick={(e) => handleAddToCart(e, product.productId)}
+                                        disabled={addingId === product.productId || product.stockQuantity === 0}
+                                        className="bg-gray-100 hover:bg-green-600 hover:text-white p-3 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                        title={product.stockQuantity === 0 ? "Out of stock" : "Add to Cart"}
+                                    >
+                                        {addingId === product.productId ? (
+                                            <div className="h-6 w-6 rounded-full border-2 border-green-600 border-t-transparent animate-spin"></div>
+                                        ) : (
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                            </svg>
+                                        )}
                                     </button>
                                 </div>
                                 <div className="mt-4 pt-4 border-t border-gray-50 flex items-center text-sm text-gray-500">
