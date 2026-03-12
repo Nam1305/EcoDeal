@@ -32,7 +32,7 @@ const AdminDashboard: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    const [growthData, setGrowthData] = useState<{month: string; orders: number; revenue: number}[]>([]);
+    const [growthData, setGrowthData] = useState<{ month: string; orders: number; revenue: number }[]>([]);
 
     useEffect(() => {
         if (authLoading) return;
@@ -187,12 +187,12 @@ const AdminDashboard: React.FC = () => {
                                             >
                                                 <defs>
                                                     <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
-                                                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
-                                                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                                                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                                                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                                                     </linearGradient>
                                                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                                                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                                                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                                                     </linearGradient>
                                                 </defs>
                                                 <XAxis dataKey="month" stroke="#cbd5e1" fontSize={12} tickLine={false} axisLine={false} />
@@ -332,8 +332,8 @@ const AdminDashboard: React.FC = () => {
                                             <td className="px-10 py-6">
                                                 <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest
                                                     ${u.role === 'Admin' ? 'bg-purple-100 text-purple-700' :
-                                                      u.role === 'StoreOwner' ? 'bg-blue-100 text-blue-700' :
-                                                      'bg-gray-100 text-gray-700'}`}>
+                                                        u.role === 'StoreOwner' ? 'bg-blue-100 text-blue-700' :
+                                                            'bg-gray-100 text-gray-700'}`}>
                                                     {u.role || 'User'}
                                                 </span>
                                             </td>
@@ -364,17 +364,15 @@ const AdminDashboard: React.FC = () => {
                                 <p className="text-center text-gray-400 py-10">Chưa có yêu cầu rút tiền nào.</p>
                             ) : (
                                 withdrawals.map(w => (
-                                    <div key={w.requestId} className={`rounded-2xl border p-6 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between ${
-                                        w.status === 'Pending' ? 'border-yellow-200 bg-yellow-50' :
+                                    <div key={w.requestId} className={`rounded-2xl border p-6 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between ${w.status === 'Pending' ? 'border-yellow-200 bg-yellow-50' :
                                         w.status === 'Approved' ? 'border-green-200 bg-green-50' : 'border-red-100 bg-red-50'
-                                    }`}>
+                                        }`}>
                                         <div className="flex-grow">
                                             <div className="flex items-center gap-3 mb-2">
                                                 <span className="font-black text-xl text-gray-800">{w.amount.toLocaleString()} VND</span>
-                                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                                                    w.status === 'Pending' ? 'bg-yellow-200 text-yellow-800' :
+                                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${w.status === 'Pending' ? 'bg-yellow-200 text-yellow-800' :
                                                     w.status === 'Approved' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'
-                                                }`}>{w.status === 'Pending' ? '⏳ Đang xử lý' : w.status === 'Approved' ? '✅ Đã duyệt' : '❌ Từ chối'}</span>
+                                                    }`}>{w.status === 'Pending' ? '⏳ Đang xử lý' : w.status === 'Approved' ? '✅ Đã duyệt' : '❌ Từ chối'}</span>
                                             </div>
                                             <p className="text-sm text-gray-700 font-medium">{w.userFullName} ({w.userEmail})</p>
                                             <p className="text-sm text-gray-500">Ngân hàng: <strong>{w.bankName}</strong> • STK: <strong>{w.accountNumber}</strong> • Chủ TK: <strong>{w.accountHolder}</strong></p>
@@ -390,7 +388,7 @@ const AdminDashboard: React.FC = () => {
                                                             await api.post(`/Withdrawal/${w.requestId}/approve`, { note: 'Đã chuyển khoản thành công.' });
                                                             const r = await api.get('/Withdrawal/all');
                                                             setWithdrawals(r.data);
-                                                        } catch(e: any) { alert(e.response?.data?.message || 'Lỗi'); }
+                                                        } catch (e: any) { alert(e.response?.data?.message || 'Lỗi'); }
                                                     }}
                                                     className="bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-green-700 transition"
                                                 >
@@ -404,7 +402,7 @@ const AdminDashboard: React.FC = () => {
                                                             await api.post(`/Withdrawal/${w.requestId}/reject`, { note: note || 'Yêu cầu không hợp lệ.' });
                                                             const r = await api.get('/Withdrawal/all');
                                                             setWithdrawals(r.data);
-                                                        } catch(e: any) { alert(e.response?.data?.message || 'Lỗi'); }
+                                                        } catch (e: any) { alert(e.response?.data?.message || 'Lỗi'); }
                                                     }}
                                                     className="bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-red-600 transition"
                                                 >

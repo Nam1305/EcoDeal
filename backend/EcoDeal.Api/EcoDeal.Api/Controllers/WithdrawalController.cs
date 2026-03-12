@@ -1,3 +1,4 @@
+using EcoDeal.Api.DTOs;
 using EcoDeal.Api.Models;
 using EcoDeal.Api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -55,7 +56,7 @@ public class WithdrawalController : ControllerBase
     // POST: api/Withdrawal/{id}/approve — Admin approves
     [Authorize(Roles = "Admin")]
     [HttpPost("{id}/approve")]
-    public async Task<IActionResult> Approve(int id, [FromBody] AdminActionDto dto)
+    public async Task<IActionResult> Approve(int id, [FromBody] AdminWithdrawalActionDto dto)
     {
         try
         {
@@ -71,7 +72,7 @@ public class WithdrawalController : ControllerBase
     // POST: api/Withdrawal/{id}/reject — Admin rejects
     [Authorize(Roles = "Admin")]
     [HttpPost("{id}/reject")]
-    public async Task<IActionResult> Reject(int id, [FromBody] AdminActionDto dto)
+    public async Task<IActionResult> Reject(int id, [FromBody] AdminWithdrawalActionDto dto)
     {
         try
         {
@@ -90,18 +91,4 @@ public class WithdrawalController : ControllerBase
         if (claim == null) throw new UnauthorizedAccessException();
         return int.Parse(claim.Value);
     }
-}
-
-// DTOs within the controller file for simplicity
-public class WithdrawalRequestDto
-{
-    public decimal Amount { get; set; }
-    public string BankName { get; set; } = string.Empty;
-    public string AccountNumber { get; set; } = string.Empty;
-    public string AccountHolder { get; set; } = string.Empty;
-}
-
-public class AdminActionDto
-{
-    public string? Note { get; set; }
 }

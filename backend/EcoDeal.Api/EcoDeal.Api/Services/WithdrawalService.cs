@@ -1,32 +1,8 @@
-using EcoDeal.Api.Controllers;
+using EcoDeal.Api.DTOs;
 using EcoDeal.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcoDeal.Api.Services;
-
-public class WithdrawalResponseDto
-{
-    public int RequestId { get; set; }
-    public decimal Amount { get; set; }
-    public string BankName { get; set; } = string.Empty;
-    public string AccountNumber { get; set; } = string.Empty;
-    public string AccountHolder { get; set; } = string.Empty;
-    public string Status { get; set; } = string.Empty;
-    public string? AdminNote { get; set; }
-    public DateTime? CreatedAt { get; set; }
-    public DateTime? ProcessedAt { get; set; }
-    public string? UserFullName { get; set; }
-    public string? UserEmail { get; set; }
-}
-
-public interface IWithdrawalService
-{
-    Task CreateRequestAsync(int userId, WithdrawalRequestDto dto);
-    Task<IEnumerable<WithdrawalResponseDto>> GetUserRequestsAsync(int userId);
-    Task<IEnumerable<WithdrawalResponseDto>> GetAllRequestsAsync(string? status);
-    Task ApproveAsync(int requestId, string? note);
-    Task RejectAsync(int requestId, string? note);
-}
 
 public class WithdrawalService : IWithdrawalService
 {
