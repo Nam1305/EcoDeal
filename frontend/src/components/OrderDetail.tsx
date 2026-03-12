@@ -46,6 +46,18 @@ const OrderDetail: React.FC = () => {
         fetchOrder();
     }, [id]);
 
+    const handleMarkReceived = async () => {
+        if (!window.confirm("Are you sure you have received this order?")) return;
+        try {
+            await orderService.markAsReceived(Number(id));
+            const data = await orderService.getOrderById(Number(id));
+            setOrder(data);
+        } catch (err) {
+            console.error("Failed to mark as received", err);
+            alert("Failed to mark as received");
+        }
+    };
+
     if (loading) {
         return <div className="text-center py-20 text-gray-500">Loading order details...</div>;
     }
@@ -62,20 +74,36 @@ const OrderDetail: React.FC = () => {
     return (
         <div className="container mx-auto px-4 py-10 max-w-4xl">
             <Link to="/orders" className="text-green-600 hover:text-green-800 flex items-center mb-6 transition font-medium">
-                &larr; Back to Orders
+                &larr; Back to Order History
             </Link>
 
             <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
                 <div className="bg-gray-50 px-8 py-6 border-b border-gray-100">
                     <div className="flex flex-col sm:flex-row justify-between items-center">
-                        <h1 className="text-2xl font-bold text-gray-800">Order #{order.orderId}</h1>
-                        <span className={`mt-2 sm:mt-0 px-4 py-1.5 rounded-full text-sm font-bold ${
-                            order.status === 'Paid' || order.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                        }`}>
-                            {order.status}
-                        </span>
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-800">Order #{order.orderId}</h1>
+                            <p className="text-gray-500 mt-2 text-sm">Placed on {new Date(order.orderDate).toLocaleString()}</p>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                            <span className={`px-4 py-1.5 rounded-full text-sm font-bold ${
+                                order.status === 'Paid' ? 'bg-blue-100 text-blue-700' : 
+                                order.status === 'Approved' ? 'bg-green-100 text-green-700' :
+                                order.status === 'Received' ? 'bg-indigo-100 text-indigo-700' :
+                                order.status === 'Cancelled' ? 'bg-red-100 text-red-700' :
+                                'bg-yellow-100 text-yellow-700'
+                            }`}>
+                                {order.status}
+                            </span>
+                            {(order.status === 'Approved' || order.status === 'Shipped') && (
+                                <button 
+                                    onClick={handleMarkReceived}
+                                    className="bg-green-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold hover:bg-green-700 transition shadow-sm"
+                                >
+                                    Mark as Received
+                                </button>
+                            )}
+                        </div>
                     </div>
-                    <p className="text-gray-500 mt-2 text-sm">Placed on {new Date(order.orderDate).toLocaleString()}</p>
                 </div>
 
                 <div className="p-8">

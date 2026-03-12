@@ -32,6 +32,18 @@ const OrderHistory: React.FC = () => {
         fetchOrders();
     }, [user]);
 
+    const handleCancel = async (id: number) => {
+        if (!window.confirm("Are you sure you want to cancel this order?")) return;
+        try {
+            await orderService.cancelOrder(id);
+            const data = await orderService.getOrders();
+            setOrders(data);
+        } catch (error) {
+            console.error("Failed to cancel order", error);
+            alert("Failed to cancel order");
+        }
+    };
+
     if (loading) {
         return <div className="text-center py-20 text-gray-500">Loading your orders...</div>;
     }
@@ -52,27 +64,40 @@ const OrderHistory: React.FC = () => {
                     {orders.map(order => (
                         <div key={order.orderId} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                             <div className="bg-gray-50 px-6 py-4 flex flex-col sm:flex-row justify-between items-center sm:items-start border-b border-gray-100">
-                                <div>
+                                <div className="flex-1">
                                     <p className="text-sm text-gray-500 mb-1">Order Placed</p>
                                     <p className="font-semibold text-gray-800">
                                         {new Date(order.orderDate).toLocaleDateString()}
                                     </p>
+                                    <p className="text-xs text-gray-400 mt-1">ID: #{order.orderId}</p>
                                 </div>
-                                <div className="mt-3 sm:mt-0 text-center sm:text-right">
+                                <div className="mt-3 sm:mt-0 text-center sm:text-right flex-1">
                                     <p className="text-sm text-gray-500 mb-1">Total Amount</p>
                                     <p className="font-bold text-green-600">{order.totalAmount.toLocaleString()} VND</p>
                                 </div>
-                                <div className="mt-3 sm:mt-0">
+                                <div className="mt-3 sm:mt-0 flex-1 text-center">
+                                    <p className="text-sm text-gray-500 mb-1">Status</p>
                                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                                        order.status === 'Paid' || order.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                                        order.status === 'Paid' ? 'bg-blue-100 text-blue-700' : 
+                                        order.status === 'Approved' ? 'bg-green-100 text-green-700' :
+                                        order.status === 'Cancelled' ? 'bg-red-100 text-red-700' :
+                                        'bg-yellow-100 text-yellow-700'
                                     }`}>
                                         {order.status}
                                     </span>
                                 </div>
-                                <div className="mt-3 sm:mt-0">
+                                <div className="mt-3 sm:mt-0 flex flex-col gap-2 items-end flex-1">
                                     <Link to={`/orders/${order.orderId}`} className="text-green-600 hover:text-green-800 font-medium text-sm transition">
                                         View Details &rarr;
                                     </Link>
+                                    {(order.status === 'Pending' || order.status === 'Paid') && (
+                                        <button 
+                                            onClick={() => handleCancel(order.orderId)}
+                                            className="text-red-500 hover:text-red-700 font-medium text-xs transition"
+                                        >
+                                            Cancel Order
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>

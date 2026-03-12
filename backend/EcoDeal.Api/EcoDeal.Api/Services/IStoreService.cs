@@ -13,5 +13,7 @@ namespace EcoDeal.Api.Services
         Task UpdateStoreAsync(int id, UpdateStoreRequest request);
         Task DeleteStoreAsync(int id);
         Task<StoreDto?> GetStoreByUserIdAsync(int userId);
+        Task<StoreDto> RegisterStoreAsync(StoreRegistrationDto dto, int userId);
+        Task<IEnumerable<StoreNearbyDto>> GetNearbyStoresAsync(double lat, double lon, double radiusKm);
     }
 }

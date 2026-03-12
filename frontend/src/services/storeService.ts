@@ -25,6 +25,17 @@ const storeService = {
     getMyStore: async () => {
         const response = await api.get<Store>('/Store/my-store');
         return response.data;
+    },
+    updateMyStore: async (storeData: any) => {
+        await api.put('/Store/my-store', storeData);
+    },
+    register: async (storeData: any) => {
+        const response = await api.post<Store>('/Store/register', storeData);
+        return response.data;
+    },
+    getNearby: async (lat: number, lon: number, radius: number = 5.0) => {
+        const response = await api.get<any[]>(`/Store/nearby?lat=${lat}&lon=${lon}&radius=${radius}`);
+        return response.data;
     }
 };
 

@@ -94,4 +94,32 @@ public class OrderController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    [HttpPatch("{id}/cancel")]
+    public async Task<IActionResult> CancelOrder(int id)
+    {
+        try
+        {
+            await _orderService.CancelOrderAsync(id, GetCurrentUserId());
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpPatch("{id}/receive")]
+    public async Task<IActionResult> MarkAsReceived(int id)
+    {
+        try
+        {
+            await _orderService.MarkOrderAsReceivedAsync(id, GetCurrentUserId());
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }

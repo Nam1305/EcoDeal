@@ -27,15 +27,18 @@ public class OrderRepository : IOrderRepository
         return await _context.Orders
             .Include(o => o.OrderDetails)
             .ThenInclude(od => od.Product)
+            .Include(o => o.Store)
+            .Include(o => o.User)
             .FirstOrDefaultAsync(o => o.OrderId == orderId);
     }
 
-    public async Task<Order?> GetOrderBySessionIdAsync(string sessionId)
+    public async Task<IEnumerable<Order>> GetOrdersBySessionIdAsync(string sessionId)
     {
         return await _context.Orders
             .Include(o => o.OrderDetails)
             .ThenInclude(od => od.Product)
-            .FirstOrDefaultAsync(o => o.StripeSessionId == sessionId);
+            .Where(o => o.StripeSessionId == sessionId)
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<Order>> GetOrdersByUserIdAsync(int userId)
@@ -44,6 +47,17 @@ public class OrderRepository : IOrderRepository
             .Include(o => o.OrderDetails)
             .ThenInclude(od => od.Product)
             .Where(o => o.UserId == userId)
+            .OrderByDescending(o => o.OrderDate)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Order>> GetOrdersByStoreIdAsync(int storeId)
+    {
+        return await _context.Orders
+            .Include(o => o.OrderDetails)
+            .ThenInclude(od => od.Product)
+            .Include(o => o.User)
+            .Where(o => o.StoreId == storeId)
             .OrderByDescending(o => o.OrderDate)
             .ToListAsync();
     }

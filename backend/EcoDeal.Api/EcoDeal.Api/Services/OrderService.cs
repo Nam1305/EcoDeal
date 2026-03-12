@@ -15,12 +15,14 @@ public class OrderService : IOrderService
     private readonly IOrderRepository _orderRepository;
     private readonly ICartRepository _cartRepository;
     private readonly IConfiguration _configuration;
+    private readonly IWalletService _walletService;
 
-    public OrderService(IOrderRepository orderRepository, ICartRepository cartRepository, IConfiguration configuration)
+    public OrderService(IOrderRepository orderRepository, ICartRepository cartRepository, IConfiguration configuration, IWalletService walletService)
     {
         _orderRepository = orderRepository;
         _cartRepository = cartRepository;
         _configuration = configuration;
+        _walletService = walletService;
     }
 
     public async Task<CheckoutResponse> CreateCheckoutSessionAsync(int userId, CheckoutRequest request)
@@ -62,27 +64,37 @@ public class OrderService : IOrderService
         var service = new SessionService();
         Session session = await service.CreateAsync(options);
 
-        // Pre-create Order as Pending
-        var order = new Order
+        // Pre-create Orders as Pending, grouped by StoreId
+        var groupedItems = cart.CartItems.GroupBy(ci => ci.Product.StoreId);
+        
+        foreach (var group in groupedItems)
         {
-            UserId = userId,
-            OrderDate = DateTime.Now,
-            TotalAmount = cart.CartItems.Sum(c => (c.Product.DiscountedPrice ?? c.Product.OriginalPrice ?? 0) * c.Quantity),
-            Status = "Pending",
-            PaymentStatus = "Unpaid",
-            PaymentMethod = "Stripe",
-            StripeSessionId = session.Id,
-            ShippingAddress = request.ShippingAddress,
-            ShippingPhone = request.ShippingPhone,
-            OrderDetails = cart.CartItems.Select(ci => new OrderDetail
+            var storeId = group.Key;
+            var items = group.ToList();
+            
+            var order = new Order
             {
-                ProductId = ci.ProductId,
-                Quantity = ci.Quantity,
-                UnitPrice = ci.Product.DiscountedPrice ?? ci.Product.OriginalPrice ?? 0
-            }).ToList()
-        };
+                UserId = userId,
+                StoreId = storeId,
+                OrderDate = DateTime.Now,
+                TotalAmount = items.Sum(c => (c.Product.DiscountedPrice ?? c.Product.OriginalPrice ?? 0) * c.Quantity),
+                Status = "Pending",
+                PaymentStatus = "Unpaid",
+                PaymentMethod = "Stripe",
+                StripeSessionId = session.Id,
+                ShippingAddress = request.ShippingAddress,
+                ShippingPhone = request.ShippingPhone,
+                OrderDetails = items.Select(ci => new OrderDetail
+                {
+                    ProductId = ci.ProductId,
+                    Quantity = ci.Quantity,
+                    UnitPrice = ci.Product.DiscountedPrice ?? ci.Product.OriginalPrice ?? 0
+                }).ToList()
+            };
 
-        await _orderRepository.CreateOrderAsync(order);
+            await _orderRepository.CreateOrderAsync(order);
+        }
+
         // Do not clear cart yet, wait until webhook or success page confirms payment.
 
         return new CheckoutResponse
@@ -94,10 +106,11 @@ public class OrderService : IOrderService
 
     public async Task<OrderDto> CreateOrderFromSessionAsync(string sessionId)
     {
-        var order = await _orderRepository.GetOrderBySessionIdAsync(sessionId);
-        if (order == null) throw new Exception("Order not found.");
+        var orders = await _orderRepository.GetOrdersBySessionIdAsync(sessionId);
+        if (!orders.Any()) throw new Exception("Order not found.");
 
-        if (order.PaymentStatus != "Paid")
+        var firstOrder = orders.First();
+        if (firstOrder.PaymentStatus != "Paid")
         {
             // Verify session with Stripe
             var service = new SessionService();
@@ -105,12 +118,15 @@ public class OrderService : IOrderService
 
             if (session.PaymentStatus == "paid")
             {
-                order.Status = "Paid";
-                order.PaymentStatus = "Paid";
-                await _orderRepository.UpdateOrderAsync(order);
+                foreach (var order in orders)
+                {
+                    order.Status = "Paid";
+                    order.PaymentStatus = "Paid";
+                    await _orderRepository.UpdateOrderAsync(order);
+                }
 
                 // Clear constraints if any or Clear cart completely here
-                var cartToClear = await _cartRepository.GetCartByUserIdAsync(order.UserId);
+                var cartToClear = await _cartRepository.GetCartByUserIdAsync(firstOrder.UserId);
                 if (cartToClear != null)
                 {
                     await _cartRepository.ClearCartAsync(cartToClear.CartId);
@@ -118,7 +134,7 @@ public class OrderService : IOrderService
             }
         }
 
-        return MapToDto(order);
+        return MapToDto(firstOrder);
     }
 
     public async Task<OrderDto?> GetOrderByIdAsync(int orderId)
@@ -131,6 +147,91 @@ public class OrderService : IOrderService
     {
         var orders = await _orderRepository.GetOrdersByUserIdAsync(userId);
         return orders.Select(MapToDto).ToList();
+    }
+
+    public async Task<IEnumerable<OrderDto>> GetOrdersByStoreIdAsync(int storeId)
+    {
+        var orders = await _orderRepository.GetOrdersByStoreIdAsync(storeId);
+        return orders.Select(MapToDto).ToList();
+    }
+
+    public async Task UpdateOrderStatusAsync(int orderId, string status, int storeOwnerId)
+    {
+        var order = await _orderRepository.GetOrderByIdAsync(orderId);
+        if (order == null) throw new Exception("Order not found.");
+        
+        // Simple verification: Store belongs to owner
+        if (order.Store?.UserId != storeOwnerId)
+            throw new UnauthorizedAccessException("You are not authorized to update this order.");
+
+        order.Status = status;
+        await _orderRepository.UpdateOrderAsync(order);
+    }
+
+    public async Task CancelOrderAsync(int orderId, int userId)
+    {
+        var order = await _orderRepository.GetOrderByIdAsync(orderId);
+        if (order == null) throw new Exception("Order not found.");
+        
+        if (order.UserId != userId)
+            throw new UnauthorizedAccessException("You are not authorized to cancel this order.");
+
+        if (order.Status != "Pending" && order.Status != "Paid")
+            throw new Exception("Only pending or paid orders that haven't been approved can be cancelled.");
+
+        string originalStatus = order.Status;
+        order.Status = "Cancelled";
+        await _orderRepository.UpdateOrderAsync(order);
+
+        // If order was already paid, refund to virtual wallet
+        if (originalStatus == "Paid" && order.TotalAmount.HasValue)
+        {
+            try
+            {
+                await _walletService.AddBalanceAsync(order.UserId, order.TotalAmount.Value, "Refund", order.OrderId);
+                Console.WriteLine($"[WALLET REFUND] Refunded {order.TotalAmount} to User #{order.UserId} for Order #{order.OrderId}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[WALLET ERROR] Failed to refund Order #{order.OrderId}: {ex.Message}");
+            }
+        }
+    }
+
+    public async Task MarkOrderAsReceivedAsync(int orderId, int userId)
+    {
+        var order = await _orderRepository.GetOrderByIdAsync(orderId);
+        if (order == null) throw new Exception("Order not found.");
+        
+        if (order.UserId != userId)
+            throw new UnauthorizedAccessException("You are not authorized for this action.");
+
+        if (order.Status != "Approved" && order.Status != "Shipped")
+            throw new Exception("Order must be Approved or Shipped to be marked as Received.");
+
+        order.Status = "Received";
+        await _orderRepository.UpdateOrderAsync(order);
+        
+        // Trigger platform payment to StoreOwner (Credit their virtual wallet)
+        try
+        {
+            if (order.StoreId.HasValue && order.TotalAmount.HasValue)
+            {
+                if (order.Store == null)
+                {
+                    // Fallback or log if Store navigation property is missing
+                    Console.WriteLine($"[WALLET ERROR] Store property is null for Order #{order.OrderId} even after fetch. StoreId: {order.StoreId}");
+                    return;
+                }
+                await _walletService.AddBalanceAsync(order.Store.UserId, order.TotalAmount.Value, "Payout", order.OrderId);
+                Console.WriteLine($"[WALLET SUCCESS] Credited {order.TotalAmount} to User #{order.Store.UserId} for Order #{order.OrderId}");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log the error but don't fail the whole request since status is already "Received"
+            Console.WriteLine($"[WALLET ERROR] Failed to credit payout for Order #{order.OrderId}: {ex.Message}");
+        }
     }
 
     private OrderDto MapToDto(Order order)

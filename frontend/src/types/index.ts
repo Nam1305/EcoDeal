@@ -22,6 +22,10 @@ export interface Store {
     storeId: number;
     userId: number;
     storeName: string;
+    description?: string;
+    storeEmail?: string;
+    storePhone?: string;
+    imageUrl?: string;
     address: string;
     latitude?: number;
     longitude?: number;

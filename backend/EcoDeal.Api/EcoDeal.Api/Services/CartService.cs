@@ -32,6 +32,9 @@ public class CartService : ICartService
         if (product == null || !product.IsActive.GetValueOrDefault(false))
             throw new Exception("Product not found or inactive.");
 
+        if (product.Store != null && product.Store.UserId == userId)
+            throw new Exception("You cannot buy your own products.");
+
         if (product.StockQuantity < request.Quantity)
             throw new Exception("Not enough stock.");
 

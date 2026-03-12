@@ -16,5 +16,23 @@ export const orderService = {
     getOrderById: async (id: number) => {
         const response = await api.get(`/order/${id}`);
         return response.data;
+    },
+    cancelOrder: async (id: number) => {
+        const response = await api.patch(`/order/${id}/cancel`);
+        return response.data;
+    },
+    getStoreOrders: async () => {
+        const response = await api.get('/storeorder');
+        return response.data;
+    },
+    updateStoreOrderStatus: async (id: number, status: string) => {
+        const response = await api.patch(`/storeorder/${id}/status`, JSON.stringify(status), {
+            headers: { 'Content-Type': 'application/json' }
+        });
+        return response.data;
+    },
+    markAsReceived: async (id: number) => {
+        const response = await api.patch(`/order/${id}/receive`);
+        return response.data;
     }
 };

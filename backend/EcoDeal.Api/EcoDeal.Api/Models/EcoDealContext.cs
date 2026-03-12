@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,6 +32,8 @@ public partial class EcoDealContext : DbContext
 
 
     public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<Wallet> Wallets { get; set; }
+    public virtual DbSet<WalletTransaction> WalletTransactions { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -108,11 +110,17 @@ public partial class EcoDealContext : DbContext
             entity.Property(e => e.StripeSessionId).HasMaxLength(255);
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.StoreId).HasColumnName("StoreID");
 
             entity.HasOne(d => d.User).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Orders_User");
+
+            entity.HasOne(d => d.Store).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.StoreId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Orders_Store");
         });
 
         modelBuilder.Entity<OrderDetail>(entity =>
@@ -174,6 +182,10 @@ public partial class EcoDealContext : DbContext
             entity.Property(e => e.Latitude).HasColumnType("decimal(9, 6)");
             entity.Property(e => e.Longitude).HasColumnType("decimal(9, 6)");
             entity.Property(e => e.StoreName).HasMaxLength(255);
+            entity.Property(e => e.Description).HasColumnName("Description").HasColumnType("nvarchar(max)");
+            entity.Property(e => e.StoreEmail).HasColumnName("StoreEmail").HasMaxLength(255);
+            entity.Property(e => e.StorePhone).HasColumnName("StorePhone").HasMaxLength(50);
+            entity.Property(e => e.ImageUrl).HasColumnName("ImageUrl").HasColumnType("nvarchar(max)");
             entity.Property(e => e.UserId).HasColumnName("UserID");
 
             entity.HasOne(d => d.User).WithMany(p => p.Stores)
@@ -197,6 +209,37 @@ public partial class EcoDealContext : DbContext
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
             entity.Property(e => e.PhoneNumber).HasMaxLength(20);
             entity.Property(e => e.Role).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<Wallet>(entity =>
+        {
+            entity.HasKey(e => e.WalletId).HasName("PK_Wallet");
+            entity.ToTable("Wallet");
+            entity.Property(e => e.WalletId).HasColumnName("WalletID");
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.Balance).HasColumnType("decimal(18, 2)").HasDefaultValue(0m);
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime").HasDefaultValueSql("(getdate())");
+
+            entity.HasOne(d => d.User).WithOne(p => p.Wallet)
+                .HasForeignKey<Wallet>(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Wallet_User");
+        });
+
+        modelBuilder.Entity<WalletTransaction>(entity =>
+        {
+            entity.HasKey(e => e.TransactionId).HasName("PK_WalletTransaction");
+            entity.ToTable("WalletTransaction");
+            entity.Property(e => e.TransactionId).HasColumnName("TransactionID");
+            entity.Property(e => e.WalletId).HasColumnName("WalletId");
+            entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.Type).HasMaxLength(50);
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime").HasDefaultValueSql("(getdate())");
+
+            entity.HasOne(d => d.Wallet).WithMany(p => p.WalletTransactions)
+                .HasForeignKey(d => d.WalletId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Transaction_Wallet");
         });
 
         OnModelCreatingPartial(modelBuilder);

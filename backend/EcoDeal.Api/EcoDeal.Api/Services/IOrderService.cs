@@ -10,4 +10,8 @@ public interface IOrderService
     Task<OrderDto> CreateOrderFromSessionAsync(string sessionId);
     Task<OrderDto?> GetOrderByIdAsync(int orderId);
     Task<IEnumerable<OrderDto>> GetOrdersByUserIdAsync(int userId);
+    Task<IEnumerable<OrderDto>> GetOrdersByStoreIdAsync(int storeId);
+    Task UpdateOrderStatusAsync(int orderId, string status, int storeOwnerId);
+    Task CancelOrderAsync(int orderId, int userId);
+    Task MarkOrderAsReceivedAsync(int orderId, int userId);
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace EcoDeal.Api.Models;
@@ -28,4 +28,5 @@ public partial class User
     public virtual ICollection<Store> Stores { get; set; } = new List<Store>();
 
     public virtual Cart? Cart { get; set; }
+    public virtual Wallet? Wallet { get; set; }
 }

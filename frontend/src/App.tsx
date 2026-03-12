@@ -15,6 +15,11 @@ import CheckoutSuccess from './components/CheckoutSuccess';
 import CheckoutCancel from './components/CheckoutCancel';
 import OrderHistory from './components/OrderHistory';
 import OrderDetail from './components/OrderDetail';
+import WalletView from './components/WalletView';
+import RegisterStore from './components/RegisterStore';
+import NearbyStores from './components/NearbyStores';
+import StoreSettings from './components/StoreSettings';
+import 'leaflet/dist/leaflet.css';
 import './App.css';
 
 import Navbar from './components/Navbar';
@@ -45,6 +50,10 @@ function App() {
                 <Route path="/checkout/cancel" element={<CheckoutCancel />} />
                 <Route path="/orders" element={<OrderHistory />} />
                 <Route path="/orders/:id" element={<OrderDetail />} />
+                <Route path="/wallet" element={<WalletView />} />
+                <Route path="/register-store" element={<RegisterStore />} />
+                <Route path="/store-settings" element={<StoreSettings />} />
+                <Route path="/nearby" element={<NearbyStores />} />
               </Routes>
             </main>
           </div>

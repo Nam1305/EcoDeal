@@ -8,7 +8,8 @@ public interface IOrderRepository
 {
     Task<Order> CreateOrderAsync(Order order);
     Task<Order?> GetOrderByIdAsync(int orderId);
-    Task<Order?> GetOrderBySessionIdAsync(string sessionId);
+    Task<IEnumerable<Order>> GetOrdersBySessionIdAsync(string sessionId);
     Task<IEnumerable<Order>> GetOrdersByUserIdAsync(int userId);
+    Task<IEnumerable<Order>> GetOrdersByStoreIdAsync(int storeId);
     Task<Order> UpdateOrderAsync(Order order);
 }

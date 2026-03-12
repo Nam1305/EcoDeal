@@ -24,6 +24,9 @@ const Navbar: React.FC = () => {
 
                 <div className="hidden md:flex items-center space-x-8">
                     <Link to="/" className="text-gray-700 hover:text-green-600 font-medium transition">Home</Link>
+                    <Link to="/nearby" className="text-emerald-600 hover:text-emerald-700 font-bold transition flex items-center gap-1">
+                        <span className="animate-pulse">📍</span> Nearby Deals
+                    </Link>
                     <Link to="/stores" className="text-gray-700 hover:text-green-600 font-medium transition">Stores</Link>
                     <Link to="/deals" className="text-gray-700 hover:text-green-600 font-medium transition">Hot Deals</Link>
                 </div>
@@ -33,12 +36,18 @@ const Navbar: React.FC = () => {
                         <div className="flex items-center space-x-4">
                             {user.role === 'StoreOwner' && (
                                 <>
-                                    <Link to="/store-owner-dashboard" className="text-gray-700 hover:text-green-600 font-medium transition">Dashboard</Link>
+                                    <Link to="/store-owner-dashboard" className="text-gray-700 hover:text-green-600 font-medium transition">Store Dashboard</Link>
                                     <Link to="/manage-products" className="text-gray-700 hover:text-green-600 font-medium transition">Manage Products</Link>
+                                    <Link to="/store-settings" className="text-gray-700 hover:text-green-600 font-medium transition">Store Settings</Link>
                                 </>
                             )}
+                            {user.role === 'User' && (
+                                <Link to="/register-store" className="bg-green-100 text-green-700 px-4 py-2 rounded-lg hover:bg-green-200 transition font-bold">Become a Seller</Link>
+                            )}
+                            <Link to="/wallet" className="text-gray-700 hover:text-green-600 font-medium transition font-bold">My Wallet</Link>
+                            <Link to="/orders" className="text-gray-700 hover:text-green-600 font-medium transition">My Orders</Link>
                             <Link to="/profile" className="text-gray-700 hover:text-green-600 font-medium transition cursor-pointer">
-                                My Profile ({user.fullName})
+                                Profile
                             </Link>
                             <button
                                 onClick={handleLogout}

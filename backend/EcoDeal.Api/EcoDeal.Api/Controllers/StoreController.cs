@@ -59,11 +59,54 @@ namespace EcoDeal.Api.Controllers
             return Ok(stores);
         }
 
+        [HttpGet("nearby")]
+        public async Task<ActionResult<IEnumerable<StoreNearbyDto>>> GetNearby([FromQuery] double lat, [FromQuery] double lon, [FromQuery] double radius = 5.0)
+        {
+            var stores = await _storeService.GetNearbyStoresAsync(lat, lon, radius);
+            return Ok(stores);
+        }
+
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        [HttpPost("register")]
+        public async Task<ActionResult<StoreDto>> Register([FromBody] StoreRegistrationDto request)
+        {
+            var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(userIdString, out int userId))
+            {
+                try
+                {
+                    var store = await _storeService.RegisterStoreAsync(request, userId);
+                    return CreatedAtAction(nameof(GetById), new { id = store.StoreId }, store);
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(new { message = ex.Message });
+                }
+            }
+            return Unauthorized();
+        }
+
         [HttpPost]
         public async Task<ActionResult<StoreDto>> Create([FromBody] CreateStoreRequest request, [FromQuery] int userId)
         {
             var store = await _storeService.AddStoreAsync(request, userId);
             return CreatedAtAction(nameof(GetById), new { id = store.StoreId }, store);
+        }
+
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        [HttpPut("my-store")]
+        public async Task<IActionResult> UpdateMyStore([FromBody] UpdateStoreRequest request)
+        {
+            var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(userIdString, out int userId))
+            {
+                var store = await _storeService.GetStoreByUserIdAsync(userId);
+                if (store == null) return NotFound(new { message = "You do not have a registered store." });
+                
+                await _storeService.UpdateStoreAsync(store.StoreId, request);
+                return NoContent();
+            }
+            return Unauthorized();
         }
 
         [HttpPut("{id}")]
