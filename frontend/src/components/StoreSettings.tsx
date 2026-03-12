@@ -185,7 +185,7 @@ const StoreSettings: React.FC = () => {
                             </button>
                             <button
                                 type="button"
-                                onClick={() => navigate('/dashboard')}
+                                onClick={() => navigate('/store-owner-dashboard')}
                                 className="px-8 py-3 rounded-xl border-2 border-gray-200 text-gray-600 font-bold hover:bg-gray-50 transition-all"
                             >
                                 Back to Dashboard

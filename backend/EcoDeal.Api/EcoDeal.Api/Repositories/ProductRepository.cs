@@ -1,4 +1,4 @@
-﻿using EcoDeal.Api.Models;
+using EcoDeal.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcoDeal.Api.Repositories
@@ -44,6 +44,23 @@ namespace EcoDeal.Api.Repositories
             var query = _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.Store);
+
+            var totalCount = await query.CountAsync();
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
+
+        public async Task<(IEnumerable<Product> Items, int TotalCount)> GetPagedHotDealsAsync(int pageNumber, int pageSize)
+        {
+            var query = _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Store)
+                .Where(p => p.IsActive == true && p.DiscountedPrice != null && p.DiscountedPrice < p.OriginalPrice)
+                .OrderByDescending(p => p.OriginalPrice - p.DiscountedPrice);
 
             var totalCount = await query.CountAsync();
             var items = await query

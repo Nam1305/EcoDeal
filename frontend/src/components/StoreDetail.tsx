@@ -87,7 +87,16 @@ const StoreDetail: React.FC = () => {
                             </div>
                             <p className="text-xl text-gray-500 font-medium mb-4">{store.address}</p>
 
-                            <div className="flex flex-wrap gap-4">
+                            <div className="flex flex-wrap gap-4 mt-6">
+                                <button 
+                                    onClick={() => {
+                                        const url = `https://www.google.com/maps/dir/?api=1&destination=${store.latitude},${store.longitude}`;
+                                        window.open(url, '_blank');
+                                    }}
+                                    className="flex items-center bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-2xl font-bold transition shadow-lg shadow-emerald-200"
+                                >
+                                    <span className="mr-2">📍</span> Get Directions
+                                </button>
                                 <div className="flex items-center bg-gray-50 px-4 py-2 rounded-2xl border border-gray-100">
                                     <span className="text-gray-400 mr-2 text-sm uppercase tracking-wider font-bold">Owner</span>
                                     <span className="text-gray-700 font-bold">{store.ownerName}</span>

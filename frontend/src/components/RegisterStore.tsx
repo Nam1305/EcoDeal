@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import storeService from '../services/storeService';
 
@@ -13,7 +13,35 @@ const RegisterStore: React.FC = () => {
         imageUrl: ''
     });
     const [loading, setLoading] = useState(false);
+    const [initialLoading, setInitialLoading] = useState(true);
+    const [isEditing, setIsEditing] = useState(false);
     const [error, setError] = useState('');
+
+    useEffect(() => {
+        const fetchExistingStore = async () => {
+            try {
+                const store = await storeService.getMyStore();
+                if (store && !store.isApproved) {
+                    setIsEditing(true);
+                    setFormData({
+                        storeName: store.storeName || '',
+                        description: store.description || '',
+                        storeEmail: store.storeEmail || '',
+                        storePhone: store.storePhone || '',
+                        storeAddress: store.address || '',
+                        imageUrl: store.imageUrl || ''
+                    });
+                }
+            } catch (err: any) {
+                // If 404, the user has no store, which is fine
+            } finally {
+                setInitialLoading(false);
+            }
+        };
+
+        fetchExistingStore();
+    }, []);
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -25,11 +53,18 @@ const RegisterStore: React.FC = () => {
         setError('');
 
         try {
-            await storeService.register(formData);
-            // Hack: To refresh the role in the app, we might need a better way.
-            // For now, let's suggest the user to re-login or use a context update if available.
-            alert('Store registered successfully! Please re-login to access your dashboard.');
-            navigate('/login');
+            if (isEditing) {
+                await storeService.updateMyStore({
+                    ...formData,
+                    address: formData.storeAddress // Map field specifically for the update payload
+                });
+                alert('Cập nhật đơn đăng ký thành công!');
+                navigate('/');
+            } else {
+                await storeService.register(formData);
+                alert('Đăng ký cửa hàng thành công! Cửa hàng của bạn đang được duyệt bởi Admin. Bạn sẽ trở thành StoreOwner sau khi được duyệt.');
+                navigate('/');
+            }
         } catch (err: any) {
             setError(err.response?.data?.message || 'Failed to register store.');
         } finally {
@@ -37,15 +72,40 @@ const RegisterStore: React.FC = () => {
         }
     };
 
+    if (initialLoading) {
+        return (
+            <div className="flex justify-center items-center min-h-[400px]">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+            </div>
+        );
+    }
+
     return (
         <div className="container mx-auto px-4 py-12 max-w-2xl">
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
                 <div className="bg-gradient-to-r from-green-600 to-teal-500 px-8 py-10 text-white">
-                    <h1 className="text-3xl font-bold mb-2">Register Your Store</h1>
-                    <p className="opacity-90">Fill in the details below to start selling on EcoDeal.</p>
+                    <h1 className="text-3xl font-bold mb-2">
+                        {isEditing ? 'Update Your Store Application' : 'Register Your Store'}
+                    </h1>
+                    <p className="opacity-90">
+                        {isEditing 
+                            ? 'You already have a pending store application. You can update the details below.' 
+                            : 'Fill in the details below to start selling on EcoDeal.'}
+                    </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-8 space-y-6">
+                    {isEditing && (
+                        <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-6 rounded-r-lg shadow-sm">
+                            <div className="flex items-center">
+                                <span className="text-xl mr-3">🕒</span>
+                                <div>
+                                    <h3 className="text-yellow-800 font-bold">Trạng thái: Đang chờ duyệt</h3>
+                                    <p className="text-yellow-700 text-sm mt-1">Đơn đăng ký của bạn đang được Admin xem xét. Việc chỉnh sửa sẽ cập nhật lại đơn hiện tại ở phía Admin.</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     {error && (
                         <div className="bg-red-50 border-l-4 border-red-500 p-4 text-red-700 text-sm">
                             {error}
@@ -133,7 +193,7 @@ const RegisterStore: React.FC = () => {
                             disabled={loading}
                             className={`w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-green-100 hover:bg-green-700 transition transform hover:-translate-y-1 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
                         >
-                            {loading ? 'Registering...' : 'Open My Store'}
+                            {loading ? (isEditing ? 'Updating...' : 'Registering...') : (isEditing ? 'Update Application' : 'Open My Store')}
                         </button>
                         <p className="text-center text-xs text-gray-400 mt-4">
                             By clicking "Open My Store", you agree to our Seller Terms and Conditions.

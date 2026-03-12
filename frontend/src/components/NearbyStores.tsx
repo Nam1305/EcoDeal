@@ -5,6 +5,16 @@ import 'leaflet/dist/leaflet.css';
 import { useGeolocation } from '../hooks/useGeolocation';
 import storeService from '../services/storeService';
 import { useNavigate } from 'react-router-dom';
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
+import 'leaflet-routing-machine';
+
+declare global {
+    namespace L {
+        namespace Routing {
+            function control(options: any): any;
+        }
+    }
+}
 
 // Fix for default marker icons in Leaflet with Webpack/Vite
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -29,6 +39,38 @@ const userIcon = new L.Icon({
     shadowSize: [41, 41]
 });
 
+// Routing Component
+const RoutingEngine = ({ from, to }: { from: [number, number], to: [number, number] | null }) => {
+    const map = useMap();
+
+    useEffect(() => {
+        if (!map || !from || !to) return;
+
+        const routingControl = L.Routing.control({
+            waypoints: [
+                L.latLng(from[0], from[1]),
+                L.latLng(to[0], to[1])
+            ],
+            lineOptions: {
+                styles: [{ color: '#10b981', weight: 6, opacity: 0.8 }]
+            },
+            createMarker: () => null, // Don't create new markers, use existing ones
+            addWaypoints: false,
+            draggableWaypoints: false,
+            fitSelectedRoutes: true,
+            show: false // Hide the instruction panel
+        }).addTo(map);
+
+        return () => {
+            if (map && routingControl) {
+                map.removeControl(routingControl);
+            }
+        };
+    }, [map, from, to]);
+
+    return null;
+};
+
 // Component to recenter map when location changes
 const RecenterMap = ({ lat, lon }: { lat: number, lon: number }) => {
     const map = useMap();
@@ -45,12 +87,20 @@ const NearbyStores: React.FC = () => {
     const [radius, setRadius] = useState(5.0);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [routingTo, setRoutingTo] = useState<any | null>(null);
+
+    const openInGoogleMaps = (lat: number, lon: number) => {
+        const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+        window.open(url, '_blank');
+    };
 
     const fetchStores = async () => {
         if (!location) return;
         setLoading(true);
         try {
+            console.log(`Fetching stores near ${location.latitude}, ${location.longitude} with radius ${radius}km`);
             const data = await storeService.getNearby(location.latitude, location.longitude, radius);
+            console.log('Stores found:', data);
             setStores(data);
             setLoading(false);
         } catch (err: any) {
@@ -128,7 +178,7 @@ const NearbyStores: React.FC = () => {
                                 </div>
                             ) : (
                                 stores.map(store => (
-                                    <div key={store.storeId} className="p-4 hover:bg-emerald-50 transition-colors cursor-pointer" onClick={() => navigate(`/store/${store.storeId}`)}>
+                                    <div key={store.storeId} className={`p-4 hover:bg-emerald-50 transition-colors cursor-pointer ${routingTo?.storeId === store.storeId ? 'bg-emerald-50 border-l-4 border-emerald-500' : ''}`} onClick={() => setRoutingTo(store)}>
                                         <div className="flex justify-between items-start mb-1">
                                             <h4 className="font-bold text-gray-800">{store.storeName}</h4>
                                             <span className="text-xs font-bold bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full whitespace-nowrap">
@@ -136,8 +186,17 @@ const NearbyStores: React.FC = () => {
                                             </span>
                                         </div>
                                         <p className="text-sm text-gray-500 line-clamp-1 mb-2">{store.address}</p>
-                                        <div className="flex items-center gap-2 text-xs text-gray-400">
-                                            <span>🚗 Est. {store.estimatedTravelTime}</span>
+                                        <div className="flex flex-wrap items-center gap-3 text-xs">
+                                            <span className="text-gray-400">🚗 Est. {store.estimatedTravelTime}</span>
+                                            <button 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    openInGoogleMaps(store.latitude, store.longitude);
+                                                }}
+                                                className="text-emerald-600 font-bold hover:underline"
+                                            >
+                                                Open Maps ↗
+                                            </button>
                                         </div>
                                     </div>
                                 ))
@@ -178,24 +237,47 @@ const NearbyStores: React.FC = () => {
                             {stores.map(store => (
                                 <Marker 
                                     key={store.storeId} 
-                                    position={[store.latitude, store.longitude]}
+                                    position={[Number(store.latitude), Number(store.longitude)]}
+                                    // Using default icon explicitly as fallback
+                                    icon={new L.Icon.Default()}
                                 >
                                     <Popup>
-                                        <div className="p-1">
+                                        <div className="p-1 max-w-[200px]">
                                             <h5 className="font-bold text-gray-800 mb-1">{store.storeName}</h5>
-                                            <p className="text-xs text-gray-500 mb-2">{store.address}</p>
-                                            <button 
-                                                onClick={() => navigate(`/store/${store.storeId}`)}
-                                                className="w-full py-1.5 px-3 bg-emerald-600 text-white text-xs font-bold rounded hover:bg-emerald-700"
-                                            >
-                                                View Store
-                                            </button>
+                                            <p className="text-xs text-gray-500 mb-2 truncate">{store.address}</p>
+                                            <div className="flex flex-col gap-2">
+                                                <button 
+                                                    onClick={() => setRoutingTo(store)}
+                                                    className="w-full py-1.5 px-3 bg-emerald-600 text-white text-xs font-bold rounded hover:bg-emerald-700"
+                                                >
+                                                    Show Route
+                                                </button>
+                                                <button 
+                                                    onClick={() => openInGoogleMaps(store.latitude, store.longitude)}
+                                                    className="w-full py-1.5 px-3 border border-emerald-600 text-emerald-600 text-xs font-bold rounded hover:bg-emerald-50"
+                                                >
+                                                    Google Maps ↗
+                                                </button>
+                                                <button 
+                                                    onClick={() => navigate(`/store/${store.storeId}`)}
+                                                    className="w-full text-center text-[10px] text-gray-400 hover:text-gray-600 underline"
+                                                >
+                                                    View Store Profile
+                                                </button>
+                                            </div>
                                         </div>
                                     </Popup>
                                 </Marker>
                             ))}
 
                             <RecenterMap lat={location.latitude} lon={location.longitude} />
+                            
+                            {routingTo && (
+                                <RoutingEngine 
+                                    from={[location.latitude, location.longitude]} 
+                                    to={[routingTo.latitude, routingTo.longitude]} 
+                                />
+                            )}
                         </MapContainer>
                     )}
                 </div>

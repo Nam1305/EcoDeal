@@ -104,7 +104,7 @@ namespace EcoDeal.Api.Services
             if (existingStore != null)
                 throw new Exception("You already have a registered store.");
 
-            // 2. Create the store
+            // 2. Create the store (Requires Admin Approval)
             var store = new Store
             {
                 StoreName = dto.StoreName,
@@ -114,19 +114,12 @@ namespace EcoDeal.Api.Services
                 Address = dto.StoreAddress,
                 ImageUrl = dto.ImageUrl,
                 UserId = userId,
-                IsApproved = true // Automatically approve for now or set to false if admin review is needed
+                IsApproved = false // Chờ Admin duyệt
             };
 
             var createdStore = await _storeRepository.AddAsync(store);
 
-            // 3. Update User Role
-            var user = await _userRepository.GetByIdAsync(userId);
-            if (user != null && user.Role != "StoreOwner")
-            {
-                user.Role = "StoreOwner";
-                await _userRepository.UpdateAsync(user);
-            }
-
+            // User Role is NOT updated here anymore. It gets updated only when Admin approves.
             return MapToDto(createdStore);
         }
 

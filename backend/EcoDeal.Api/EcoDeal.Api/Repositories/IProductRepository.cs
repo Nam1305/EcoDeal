@@ -1,4 +1,4 @@
-﻿using EcoDeal.Api.Models;
+using EcoDeal.Api.Models;
 
 namespace EcoDeal.Api.Repositories
 {
@@ -8,6 +8,7 @@ namespace EcoDeal.Api.Repositories
         Task<IEnumerable<Product>> GetCheapestProductsAsync(int count);
         Task<Product?> GetByIdAsync(int id);
         Task<(IEnumerable<Product> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize);
+        Task<(IEnumerable<Product> Items, int TotalCount)> GetPagedHotDealsAsync(int pageNumber, int pageSize);
         Task<Product> AddAsync(Product product);
         Task<IEnumerable<Product>> SearchByNameAsync(string name);
         Task<IEnumerable<Product>> GetByStoreIdAsync(int storeId);

@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import type { Store } from '../types';
 
 const ProductManagement: React.FC = () => {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const navigate = useNavigate();
 
     const [store, setStore] = useState<Store | null>(null);
@@ -44,12 +44,14 @@ const ProductManagement: React.FC = () => {
     };
 
     useEffect(() => {
+        if (authLoading) return;
+
         if (user === null || user.role !== 'StoreOwner') {
             navigate('/login');
             return;
         }
         fetchData();
-    }, [user, navigate]);
+    }, [user, navigate, authLoading]);
 
     const handleOpenModal = (product?: ProductDto) => {
         if (product) {
@@ -134,7 +136,7 @@ const ProductManagement: React.FC = () => {
         }
     };
 
-    if (loading) return <div className="p-8 text-center text-gray-600">Loading Product Management...</div>;
+    if (authLoading || loading) return <div className="p-8 text-center text-gray-600">Loading Product Management...</div>;
     if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
     const formatCurrency = (amount: number) => {

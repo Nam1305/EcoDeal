@@ -28,7 +28,7 @@ interface TopProductDto {
 }
 
 const StoreOwnerDashboard: React.FC = () => {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const navigate = useNavigate();
     const [overview, setOverview] = useState<DashboardOverviewDto | null>(null);
     const [recentOrders, setRecentOrders] = useState<RecentOrderDto[]>([]);
@@ -39,6 +39,8 @@ const StoreOwnerDashboard: React.FC = () => {
     const [error, setError] = useState('');
 
     useEffect(() => {
+        if (authLoading) return;
+
         if (user === null) {
             navigate('/login');
             return;
@@ -70,9 +72,9 @@ const StoreOwnerDashboard: React.FC = () => {
         };
 
         fetchDashboardData();
-    }, [user, navigate]);
+    }, [user, navigate, authLoading]);
 
-    if (loading) return <div className="p-8 text-center text-gray-600">Loading Dashboard...</div>;
+    if (authLoading || loading) return <div className="p-8 text-center text-gray-600">Loading Dashboard...</div>;
     if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
     const formatCurrency = (amount: number) => {

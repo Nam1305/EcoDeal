@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const UserProfile: React.FC = () => {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const navigate = useNavigate();
 
     const [profile, setProfile] = useState<UserProfileDto | null>(null);
@@ -23,6 +23,8 @@ const UserProfile: React.FC = () => {
     });
 
     useEffect(() => {
+        if (authLoading) return;
+
         if (!user) {
             navigate('/login');
             return;
@@ -47,7 +49,7 @@ const UserProfile: React.FC = () => {
         };
 
         fetchProfile();
-    }, [user, navigate]);
+    }, [user, navigate, authLoading]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value, type } = e.target;
@@ -69,7 +71,7 @@ const UserProfile: React.FC = () => {
         }
     };
 
-    if (loading) return <div className="p-8 text-center text-gray-500">Loading Profile...</div>;
+    if (authLoading || loading) return <div className="p-8 text-center text-gray-500">Loading Profile...</div>;
     if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
     return (

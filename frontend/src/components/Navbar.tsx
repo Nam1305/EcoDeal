@@ -34,6 +34,11 @@ const Navbar: React.FC = () => {
                 <div className="flex items-center space-x-4">
                     {user ? (
                         <div className="flex items-center space-x-4">
+                            {user.role === 'Admin' && (
+                                <Link to="/admin-dashboard" className="text-purple-600 hover:text-purple-700 font-bold transition flex items-center gap-1">
+                                    <span>🛡️</span> Admin Panel
+                                </Link>
+                            )}
                             {user.role === 'StoreOwner' && (
                                 <>
                                     <Link to="/store-owner-dashboard" className="text-gray-700 hover:text-green-600 font-medium transition">Store Dashboard</Link>
@@ -41,7 +46,7 @@ const Navbar: React.FC = () => {
                                     <Link to="/store-settings" className="text-gray-700 hover:text-green-600 font-medium transition">Store Settings</Link>
                                 </>
                             )}
-                            {user.role === 'User' && (
+                            {(user.role === 'User' || !user.role) && (
                                 <Link to="/register-store" className="bg-green-100 text-green-700 px-4 py-2 rounded-lg hover:bg-green-200 transition font-bold">Become a Seller</Link>
                             )}
                             <Link to="/wallet" className="text-gray-700 hover:text-green-600 font-medium transition font-bold">My Wallet</Link>

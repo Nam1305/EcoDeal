@@ -19,8 +19,11 @@ import WalletView from './components/WalletView';
 import RegisterStore from './components/RegisterStore';
 import NearbyStores from './components/NearbyStores';
 import StoreSettings from './components/StoreSettings';
+import AdminDashboard from './components/AdminDashboard';
 import 'leaflet/dist/leaflet.css';
 import './App.css';
+
+import HotDeals from './components/HotDeals';
 
 import Navbar from './components/Navbar';
 import { CartProvider } from './context/CartContext';
@@ -54,6 +57,8 @@ function App() {
                 <Route path="/register-store" element={<RegisterStore />} />
                 <Route path="/store-settings" element={<StoreSettings />} />
                 <Route path="/nearby" element={<NearbyStores />} />
+                <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                <Route path="/deals" element={<HotDeals />} />
               </Routes>
             </main>
           </div>

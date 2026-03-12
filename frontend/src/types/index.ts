@@ -41,3 +41,13 @@ export interface PagedResponse<T> {
     totalPages: number;
 }
 
+export interface UserProfileDto {
+    userId: number;
+    fullName?: string;
+    email: string;
+    phoneNumber?: string;
+    address?: string;
+    latitude?: number;
+    longitude?: number;
+    role?: string;
+}

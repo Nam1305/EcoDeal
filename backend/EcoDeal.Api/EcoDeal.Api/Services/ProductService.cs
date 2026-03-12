@@ -43,6 +43,18 @@ namespace EcoDeal.Api.Services
             };
         }
 
+        public async Task<PagedResponse<ProductDto>> GetPagedHotDealsAsync(int pageNumber, int pageSize)
+        {
+            var (items, totalCount) = await _productRepository.GetPagedHotDealsAsync(pageNumber, pageSize);
+            return new PagedResponse<ProductDto>
+            {
+                Items = items.Select(MapToDto),
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+        }
+
         public async Task<ProductDto> CreateProductAsync(CreateProductRequest request)
         {
             var product = new Product

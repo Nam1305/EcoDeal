@@ -49,6 +49,14 @@ namespace EcoDeal.Api.Controllers
             return Ok(response);
         }
 
+        //Get paged hot deals
+        [HttpGet("hot-deals/paged")]
+        public async Task<ActionResult<PagedResponse<ProductDto>>> GetPagedHotDeals(int pageNumber = 1, int pageSize = 8)
+        {
+            var response = await _productService.GetPagedHotDealsAsync(pageNumber, pageSize);
+            return Ok(response);
+        }
+
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<ProductDto>>> GetByName(string name)
         {
