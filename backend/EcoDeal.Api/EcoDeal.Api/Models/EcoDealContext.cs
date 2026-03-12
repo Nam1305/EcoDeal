@@ -35,6 +35,7 @@ public partial class EcoDealContext : DbContext
     public virtual DbSet<User> Users { get; set; }
     public virtual DbSet<Wallet> Wallets { get; set; }
     public virtual DbSet<WalletTransaction> WalletTransactions { get; set; }
+    public virtual DbSet<WithdrawalRequest> WithdrawalRequests { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -274,6 +275,26 @@ public partial class EcoDealContext : DbContext
                 .HasForeignKey(d => d.WalletId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Transaction_Wallet");
+        });
+
+        modelBuilder.Entity<WithdrawalRequest>(entity =>
+        {
+            entity.HasKey(e => e.RequestId);
+            entity.ToTable("WithdrawalRequests");
+            entity.Property(e => e.RequestId).HasColumnName("RequestID");
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.BankName).HasMaxLength(255);
+            entity.Property(e => e.AccountNumber).HasMaxLength(100);
+            entity.Property(e => e.AccountHolder).HasMaxLength(255);
+            entity.Property(e => e.Status).HasMaxLength(50).HasDefaultValue("Pending");
+            entity.Property(e => e.AdminNote).HasMaxLength(500);
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime").HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.ProcessedAt).HasColumnType("datetime");
+
+            entity.HasOne(d => d.User).WithMany()
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_WithdrawalRequests_User");
         });
 
         OnModelCreatingPartial(modelBuilder);

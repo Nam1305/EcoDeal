@@ -18,3 +18,10 @@ public class AdminStoreDto
     public string? StorePhone { get; set; }
     public bool? IsApproved { get; set; }
 }
+
+public class MonthlyGrowthDto
+{
+    public string Month { get; set; } = string.Empty;
+    public int Orders { get; set; }
+    public decimal Revenue { get; set; }
+}

@@ -9,4 +9,5 @@ public interface IAdminService
     Task<bool> ApproveStoreAsync(int storeId);
     Task<bool> RejectStoreAsync(int storeId);
     Task<IEnumerable<UserProfileDto>> GetAllUsersAsync();
+    Task<IEnumerable<MonthlyGrowthDto>> GetMonthlyGrowthAsync(int months = 6);
 }

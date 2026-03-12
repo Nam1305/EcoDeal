@@ -4,8 +4,22 @@ import type { AdminStats, AdminStore } from '../services/adminService';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import type { UserProfileDto } from '../types';
+import api from '../services/api';
 
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+interface WithdrawalAdminItem {
+    requestId: number;
+    amount: number;
+    bankName: string;
+    accountNumber: string;
+    accountHolder: string;
+    status: string;
+    adminNote?: string;
+    createdAt: string;
+    userFullName?: string;
+    userEmail?: string;
+}
 
 const AdminDashboard: React.FC = () => {
     const { user, loading: authLoading } = useAuth();
@@ -13,20 +27,12 @@ const AdminDashboard: React.FC = () => {
     const [stats, setStats] = useState<AdminStats | null>(null);
     const [pendingStores, setPendingStores] = useState<AdminStore[]>([]);
     const [users, setUsers] = useState<UserProfileDto[]>([]);
-    const [activeTab, setActiveTab] = useState<'overview' | 'stores' | 'users'>('overview');
+    const [withdrawals, setWithdrawals] = useState<WithdrawalAdminItem[]>([]);
+    const [activeTab, setActiveTab] = useState<'overview' | 'stores' | 'users' | 'withdrawals'>('overview');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    // Mock data for the graph
-    const growthData = [
-        { name: 'Jan', users: 4000, stores: 2400 },
-        { name: 'Feb', users: 3000, stores: 1398 },
-        { name: 'Mar', users: 2000, stores: 9800 },
-        { name: 'Apr', users: 2780, stores: 3908 },
-        { name: 'May', users: 1890, stores: 4800 },
-        { name: 'Jun', users: 2390, stores: 3800 },
-        { name: 'Jul', users: 3490, stores: 4300 },
-    ];
+    const [growthData, setGrowthData] = useState<{month: string; orders: number; revenue: number}[]>([]);
 
     useEffect(() => {
         if (authLoading) return;
@@ -42,15 +48,17 @@ const AdminDashboard: React.FC = () => {
 
         const fetchAdminData = async () => {
             try {
-                const [statsData, pendingData, usersData] = await Promise.all([
+                const [statsData, pendingData, usersData, growthRes] = await Promise.all([
                     adminService.getStats(),
                     adminService.getPendingStores(),
-                    adminService.getAllUsers()
+                    adminService.getAllUsers(),
+                    api.get('/Admin/growth?months=6')
                 ]);
 
                 setStats(statsData);
                 setPendingStores(pendingData);
                 setUsers(usersData);
+                setGrowthData(growthRes.data);
             } catch (err: any) {
                 setError(err.response?.data?.message || 'Failed to load admin data.');
                 console.error(err);
@@ -117,7 +125,21 @@ const AdminDashboard: React.FC = () => {
                             onClick={() => setActiveTab('users')}
                             className={`px-6 py-2 rounded-xl text-sm font-bold transition ${activeTab === 'users' ? 'bg-green-600 text-white' : 'text-gray-500 hover:bg-gray-50'}`}
                         >
-                            Users
+                            👥 Users
+                        </button>
+                        <button
+                            onClick={() => {
+                                setActiveTab('withdrawals');
+                                api.get('/Withdrawal/all').then(r => setWithdrawals(r.data)).catch(console.error);
+                            }}
+                            className={`px-6 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 ${activeTab === 'withdrawals' ? 'bg-green-600 text-white' : 'text-gray-500 hover:bg-gray-50'}`}
+                        >
+                            💸 Rút tiền
+                            {withdrawals.filter(w => w.status === 'Pending').length > 0 && (
+                                <span className="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 font-black">
+                                    {withdrawals.filter(w => w.status === 'Pending').length}
+                                </span>
+                            )}
                         </button>
                     </div>
                 </div>
@@ -156,7 +178,7 @@ const AdminDashboard: React.FC = () => {
                             <h2 className="text-2xl font-black text-gray-800 mb-6">Quick Overview</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                 <div className="space-y-4">
-                                    <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest">Growth Metrics</h3>
+                                    <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest">📊 Đơn hàng & Doanh thu theo tháng</h3>
                                     <div className="h-[250px] w-full mt-4">
                                         <ResponsiveContainer width="100%" height="100%">
                                             <AreaChart
@@ -164,23 +186,25 @@ const AdminDashboard: React.FC = () => {
                                                 margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
                                             >
                                                 <defs>
-                                                    <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                                                    <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
                                                         <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
                                                         <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
                                                     </linearGradient>
-                                                    <linearGradient id="colorStores" x1="0" y1="0" x2="0" y2="1">
+                                                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                                                         <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
                                                         <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
                                                     </linearGradient>
                                                 </defs>
-                                                <XAxis dataKey="name" stroke="#cbd5e1" fontSize={12} tickLine={false} axisLine={false} />
-                                                <YAxis stroke="#cbd5e1" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value / 1000}k`} />
+                                                <XAxis dataKey="month" stroke="#cbd5e1" fontSize={12} tickLine={false} axisLine={false} />
+                                                <YAxis yAxisId="left" stroke="#cbd5e1" fontSize={12} tickLine={false} axisLine={false} />
+                                                <YAxis yAxisId="right" orientation="right" stroke="#cbd5e1" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`} />
                                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                                <Tooltip 
+                                                <Tooltip
                                                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                                    formatter={(value: number, name: string) => [name === 'revenue' ? `${value.toLocaleString()} VND` : value, name === 'revenue' ? 'Doanh thu' : 'Đơn hàng']}
                                                 />
-                                                <Area type="monotone" dataKey="users" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorUsers)" />
-                                                <Area type="monotone" dataKey="stores" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorStores)" />
+                                                <Area yAxisId="left" type="monotone" dataKey="orders" name="Đơn hàng" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorOrders)" />
+                                                <Area yAxisId="right" type="monotone" dataKey="revenue" name="Doanh thu" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
                                             </AreaChart>
                                         </ResponsiveContainer>
                                     </div>
@@ -325,6 +349,72 @@ const AdminDashboard: React.FC = () => {
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'withdrawals' && (
+                    <div className="bg-white rounded-[3rem] shadow-sm border border-gray-100 overflow-hidden">
+                        <div className="px-10 py-8 border-b border-gray-50">
+                            <h2 className="text-2xl font-black text-gray-800">💸 Quản lý yêu cầu rút tiền</h2>
+                            <p className="text-gray-400 text-sm mt-1">Xem xét và duyệt/từ chối các yêu cầu rút tiền của người dùng.</p>
+                        </div>
+                        <div className="p-8 space-y-4">
+                            {withdrawals.length === 0 ? (
+                                <p className="text-center text-gray-400 py-10">Chưa có yêu cầu rút tiền nào.</p>
+                            ) : (
+                                withdrawals.map(w => (
+                                    <div key={w.requestId} className={`rounded-2xl border p-6 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between ${
+                                        w.status === 'Pending' ? 'border-yellow-200 bg-yellow-50' :
+                                        w.status === 'Approved' ? 'border-green-200 bg-green-50' : 'border-red-100 bg-red-50'
+                                    }`}>
+                                        <div className="flex-grow">
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <span className="font-black text-xl text-gray-800">{w.amount.toLocaleString()} VND</span>
+                                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                                                    w.status === 'Pending' ? 'bg-yellow-200 text-yellow-800' :
+                                                    w.status === 'Approved' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'
+                                                }`}>{w.status === 'Pending' ? '⏳ Đang xử lý' : w.status === 'Approved' ? '✅ Đã duyệt' : '❌ Từ chối'}</span>
+                                            </div>
+                                            <p className="text-sm text-gray-700 font-medium">{w.userFullName} ({w.userEmail})</p>
+                                            <p className="text-sm text-gray-500">Ngân hàng: <strong>{w.bankName}</strong> • STK: <strong>{w.accountNumber}</strong> • Chủ TK: <strong>{w.accountHolder}</strong></p>
+                                            <p className="text-xs text-gray-400 mt-1">Gửi lúc: {new Date(w.createdAt).toLocaleString()}</p>
+                                            {w.adminNote && <p className="text-xs text-gray-500 italic mt-1">Ghi chú: {w.adminNote}</p>}
+                                        </div>
+                                        {w.status === 'Pending' && (
+                                            <div className="flex gap-2 shrink-0">
+                                                <button
+                                                    onClick={async () => {
+                                                        if (!window.confirm(`Duyệt yêu cầu rút ${w.amount.toLocaleString()} VND của ${w.userFullName}? Tiền sẽ bị trừ khỏi ví ngay.`)) return;
+                                                        try {
+                                                            await api.post(`/Withdrawal/${w.requestId}/approve`, { note: 'Đã chuyển khoản thành công.' });
+                                                            const r = await api.get('/Withdrawal/all');
+                                                            setWithdrawals(r.data);
+                                                        } catch(e: any) { alert(e.response?.data?.message || 'Lỗi'); }
+                                                    }}
+                                                    className="bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-green-700 transition"
+                                                >
+                                                    ✅ Duyệt
+                                                </button>
+                                                <button
+                                                    onClick={async () => {
+                                                        const note = window.prompt('Lý do từ chối (tuỳ chọn):');
+                                                        if (note === null) return; // cancelled
+                                                        try {
+                                                            await api.post(`/Withdrawal/${w.requestId}/reject`, { note: note || 'Yêu cầu không hợp lệ.' });
+                                                            const r = await api.get('/Withdrawal/all');
+                                                            setWithdrawals(r.data);
+                                                        } catch(e: any) { alert(e.response?.data?.message || 'Lỗi'); }
+                                                    }}
+                                                    className="bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-red-600 transition"
+                                                >
+                                                    ❌ Từ chối
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))
+                            )}
                         </div>
                     </div>
                 )}

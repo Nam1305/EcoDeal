@@ -94,4 +94,36 @@ public class AdminService : IAdminService
             })
             .ToListAsync();
     }
+
+    public async Task<IEnumerable<MonthlyGrowthDto>> GetMonthlyGrowthAsync(int months = 6)
+    {
+        var startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddMonths(-months + 1);
+
+        var orders = await _context.Orders
+            .Where(o => o.OrderDate >= startDate)
+            .ToListAsync();
+
+        var grouped = orders
+            .GroupBy(o => new { o.OrderDate!.Value.Year, o.OrderDate.Value.Month })
+            .Select(g => new MonthlyGrowthDto
+            {
+                Month = $"{g.Key.Year}-{g.Key.Month:D2}",
+                Orders = g.Count(),
+                Revenue = g.Sum(o => o.TotalAmount ?? 0)
+            })
+            .OrderBy(g => g.Month)
+            .ToList();
+
+        // Fill in missing months with zeros
+        var result = new List<MonthlyGrowthDto>();
+        for (int i = 0; i < months; i++)
+        {
+            var date = startDate.AddMonths(i);
+            var key = $"{date.Year}-{date.Month:D2}";
+            var existing = grouped.FirstOrDefault(g => g.Month == key);
+            result.Add(existing ?? new MonthlyGrowthDto { Month = key, Orders = 0, Revenue = 0 });
+        }
+
+        return result;
+    }
 }

@@ -52,4 +52,11 @@ public class AdminController : ControllerBase
         var users = await _adminService.GetAllUsersAsync();
         return Ok(users);
     }
+
+    [HttpGet("growth")]
+    public async Task<IActionResult> GetGrowthData([FromQuery] int months = 6)
+    {
+        var data = await _adminService.GetMonthlyGrowthAsync(months);
+        return Ok(data);
+    }
 }
