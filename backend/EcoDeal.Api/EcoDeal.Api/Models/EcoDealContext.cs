@@ -31,6 +31,7 @@ public partial class EcoDealContext : DbContext
 
 
 
+    public virtual DbSet<Review> Reviews { get; set; }
     public virtual DbSet<User> Users { get; set; }
     public virtual DbSet<Wallet> Wallets { get; set; }
     public virtual DbSet<WalletTransaction> WalletTransactions { get; set; }
@@ -209,6 +210,39 @@ public partial class EcoDealContext : DbContext
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
             entity.Property(e => e.PhoneNumber).HasMaxLength(20);
             entity.Property(e => e.Role).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<Review>(entity =>
+        {
+            entity.HasKey(e => e.ReviewId).HasName("PK_Reviews");
+
+            entity.ToTable("Reviews");
+
+            entity.HasIndex(e => new { e.UserId, e.ProductId, e.OrderId }, "UQ_Reviews_User_Product_Order").IsUnique();
+
+            entity.Property(e => e.ReviewId).HasColumnName("ReviewID");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.OrderId).HasColumnName("OrderID");
+            entity.Property(e => e.ProductId).HasColumnName("ProductID");
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.Comment).HasMaxLength(1000);
+
+            entity.HasOne(d => d.Order).WithMany()
+                .HasForeignKey(d => d.OrderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Reviews_Order");
+
+            entity.HasOne(d => d.Product).WithMany()
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Reviews_Product");
+
+            entity.HasOne(d => d.User).WithMany()
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Reviews_User");
         });
 
         modelBuilder.Entity<Wallet>(entity =>

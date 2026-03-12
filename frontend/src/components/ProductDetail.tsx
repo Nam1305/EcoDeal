@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import productService from '../services/productService';
+import reviewService, { type Review } from '../services/reviewService';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import type { Product } from '../types';
@@ -10,6 +11,7 @@ const ProductDetail: React.FC = () => {
     const navigate = useNavigate();
     const [product, setProduct] = useState<Product | null>(null);
     const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
+    const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const { addToCart } = useCart();
@@ -23,6 +25,14 @@ const ProductDetail: React.FC = () => {
             try {
                 const productData = await productService.getById(Number(id));
                 setProduct(productData);
+
+                // Fetch reviews
+                try {
+                    const reviewData = await reviewService.getReviewsByProduct(Number(id));
+                    setReviews(reviewData);
+                } catch (revErr) {
+                    console.error('Error fetching reviews:', revErr);
+                }
 
                 // MOCK: Get similar products using the cheapest products API
                 const similarData = await productService.getCheapest(4);
@@ -56,6 +66,10 @@ const ProductDetail: React.FC = () => {
             setAdding(false);
         }
     };
+
+    const averageRating = reviews.length > 0
+        ? (reviews.reduce((acc, rev) => acc + rev.rating, 0) / reviews.length).toFixed(1)
+        : null;
 
     if (loading) {
         return (
@@ -150,9 +164,23 @@ const ProductDetail: React.FC = () => {
                                         </span>
                                     </div>
 
-                                    <h1 className="text-4xl font-black text-gray-800 mb-4 leading-tight">
+                                    <h1 className="text-4xl font-black text-gray-800 mb-2 leading-tight">
                                         {product.productName}
                                     </h1>
+
+                                    {averageRating && (
+                                        <div className="flex items-center mb-4">
+                                            <div className="flex text-yellow-400">
+                                                {[...Array(5)].map((_, i) => (
+                                                    <svg key={i} className={`h-5 w-5 ${i < Math.floor(Number(averageRating)) ? 'fill-current' : 'text-gray-300'}`} viewBox="0 0 20 20" fill="currentColor">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                    </svg>
+                                                ))}
+                                            </div>
+                                            <span className="ml-2 text-gray-600 font-bold">{averageRating}</span>
+                                            <span className="ml-1 text-gray-400 text-sm">({reviews.length} đánh giá)</span>
+                                        </div>
+                                    )}
 
                                     <div className="flex items-center mb-8">
                                         <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
@@ -241,6 +269,67 @@ const ProductDetail: React.FC = () => {
                                 <div className="p-4 bg-green-50/50 rounded-2xl border border-green-50">
                                     <h4 className="font-bold text-green-800 mb-2 font-display">Environmental Impact</h4>
                                     <p className="text-sm text-green-700">Buying this product prevents roughly 0.5kg of waste and saves the resources used in its production.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Reviews Section */}
+                        <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 mt-8">
+                            <h3 className="text-2xl font-bold text-gray-800 mb-8 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 mr-3 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.54 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.784.57-1.838-.197-1.539-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                </svg>
+                                Customer Reviews ({reviews.length})
+                            </h3>
+
+                            <div className="flex flex-col">
+                                {/* CTA to write review via order history */}
+                                <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 mb-6 flex items-center gap-3">
+                                    <span className="text-2xl">⭐</span>
+                                    <div>
+                                        <p className="text-sm font-semibold text-amber-800">Đã mua sản phẩm này?</p>
+                                        <p className="text-xs text-amber-600">
+                                            Vào{' '}
+                                            <Link to="/orders" className="underline font-bold hover:text-amber-800">Lịch sử đơn hàng</Link>
+                                            {' '}để đánh giá từng sản phẩm bạn đã mua.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Read-only review list */}
+                                <div className="lg:col-span-3">
+                                    {reviews.length === 0 ? (
+                                        <div className="h-full flex flex-col items-center justify-center py-10 opacity-40">
+                                            <div className="text-5xl mb-4">💬</div>
+                                            <p className="text-gray-500 font-medium italic">Chưa có đánh giá nào cho sản phẩm này.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-6">
+                                            {reviews.map((rev) => (
+                                                <div key={rev.reviewId} className="border-b border-gray-50 pb-6 last:border-0 last:pb-0">
+                                                    <div className="flex justify-between items-start mb-3">
+                                                        <div className="flex items-center">
+                                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white font-black text-sm mr-3">
+                                                                {rev.userFullName?.charAt(0) || 'U'}
+                                                            </div>
+                                                            <div>
+                                                                <h5 className="font-bold text-gray-800 text-sm leading-none mb-1">{rev.userFullName}</h5>
+                                                                <div className="flex text-yellow-400">
+                                                                    {[...Array(5)].map((_, i) => (
+                                                                        <svg key={i} className={`h-3 w-3 ${i < rev.rating ? 'fill-current' : 'text-gray-200'}`} viewBox="0 0 20 20" fill="currentColor">
+                                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                                        </svg>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <span className="text-xs text-gray-400">{new Date(rev.createdAt).toLocaleDateString()}</span>
+                                                    </div>
+                                                    <p className="text-gray-600 text-sm leading-relaxed">{rev.comment || 'Người dùng không để lại lời nhắn.'}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
