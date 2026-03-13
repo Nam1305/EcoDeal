@@ -57,6 +57,17 @@ namespace EcoDeal.Api.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Store>> SearchNearbyAsync(double minLat, double maxLat, double minLon, double maxLon)
+        {
+            // Database-level filtering using bounding box
+            return await _context.Stores
+                .Include(s => s.User)
+                .Where(s => s.IsApproved == true 
+                       && s.Latitude >= (decimal)minLat && s.Latitude <= (decimal)maxLat
+                       && s.Longitude >= (decimal)minLon && s.Longitude <= (decimal)maxLon)
+                .ToListAsync();
+        }
+
         public async Task<Store> AddAsync(Store store)
         {
             _context.Stores.Add(store);

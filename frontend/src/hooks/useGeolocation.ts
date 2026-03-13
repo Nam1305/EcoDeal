@@ -19,6 +19,16 @@ export const useGeolocation = () => {
     });
 
     useEffect(() => {
+        // Mock location for testing: FPT University Hòa Lạc
+        // setState({
+        //     location: {
+        //         latitude: 21.012879,
+        //         longitude: 105.527632,
+        //     },
+        //     error: null,
+        //     loading: false,
+        // });
+
         if (!navigator.geolocation) {
             setState({
                 location: null,
@@ -48,6 +58,7 @@ export const useGeolocation = () => {
         };
 
         navigator.geolocation.getCurrentPosition(onSuccess, onError);
+
     }, []);
 
     return state;

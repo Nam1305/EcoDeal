@@ -9,6 +9,7 @@ namespace EcoDeal.Api.Repositories
         Task<(IEnumerable<Store> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize);
         Task<IEnumerable<Store>> SearchByNameAsync(string name);
         Task<IEnumerable<Store>> GetByApprovalStatusAsync(bool isApproved);
+        Task<IEnumerable<Store>> SearchNearbyAsync(double minLat, double maxLat, double minLon, double maxLon);
         Task<Store> AddAsync(Store store);
         Task UpdateAsync(Store store);
         Task DeleteAsync(int id);

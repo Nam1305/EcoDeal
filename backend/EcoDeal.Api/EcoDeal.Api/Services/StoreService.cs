@@ -127,10 +127,23 @@ namespace EcoDeal.Api.Services
 
         public async Task<IEnumerable<StoreNearbyDto>> GetNearbyStoresAsync(double lat, double lon, double radiusKm)
         {
-            var allStores = await _storeRepository.GetAllAsync();
+            // Bounding box calculation for database-level filtering
+            // 1 degree lat ~ 111km
+            // 1 degree lon ~ 111km * cos(lat)
+            double latDelta = radiusKm / 111.0;
+            double lonDelta = radiusKm / (111.0 * Math.Cos(lat * Math.PI / 180.0));
+
+            double minLat = lat - latDelta;
+            double maxLat = lat + latDelta;
+            double minLon = lon - lonDelta;
+            double maxLon = lon + lonDelta;
+
+            // Fetch only stores within the bounding box from the database
+            var potentialStores = await _storeRepository.SearchNearbyAsync(minLat, maxLat, minLon, maxLon);
+            
             var nearbyStores = new List<StoreNearbyDto>();
 
-            foreach (var store in allStores)
+            foreach (var store in potentialStores)
             {
                 if (!store.Latitude.HasValue || !store.Longitude.HasValue) continue;
 
