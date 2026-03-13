@@ -36,6 +36,20 @@ const Home: React.FC = () => {
         }
     };
 
+    const handleCategoryClick = async (categoryId: number) => {
+        setSearching(true);
+        try {
+            const pResults = await productService.getByCategoryId(categoryId);
+            setProductResults(pResults);
+            setStoreResults([]); // Clear stores when filtering by category
+        } catch (error) {
+            console.error('Error fetching category products:', error);
+            setProductResults([]);
+        } finally {
+            setSearching(false);
+        }
+    };
+
     const hasResults = (productResults && productResults.length > 0) || (storeResults && storeResults.length > 0);
 
     return (
@@ -172,7 +186,7 @@ const Home: React.FC = () => {
                     </section>
                 ) : (
                     <>
-                        <CategoryList />
+                        <CategoryList onCategoryClick={handleCategoryClick} />
                         <ProductDeal />
 
                         {/* Extra Value Proposition Section */}

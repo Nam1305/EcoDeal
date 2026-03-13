@@ -12,6 +12,7 @@ namespace EcoDeal.Api.Repositories
         Task<Product> AddAsync(Product product);
         Task<IEnumerable<Product>> SearchByNameAsync(string name);
         Task<IEnumerable<Product>> GetByStoreIdAsync(int storeId);
+        Task<IEnumerable<Product>> GetByCategoryIdAsync(int categoryId);
         Task UpdateAsync(Product product);
         Task DeleteAsync(int id);
     }

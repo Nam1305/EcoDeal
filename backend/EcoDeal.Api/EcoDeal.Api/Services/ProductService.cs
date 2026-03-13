@@ -106,6 +106,12 @@ namespace EcoDeal.Api.Services
             return products.Select(MapToDto);
         }
 
+        public async Task<IEnumerable<ProductDto>> GetProductsByCategoryIdAsync(int categoryId)
+        {
+            var products = await _productRepository.GetByCategoryIdAsync(categoryId);
+            return products.Select(MapToDto);
+        }
+
         public async Task DeleteProductAsync(int id)
         {
             await _productRepository.DeleteAsync(id);

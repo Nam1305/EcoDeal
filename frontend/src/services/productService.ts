@@ -22,6 +22,10 @@ const productService = {
         const response = await api.get<Product[]>(`/Product/store/${storeId}`);
         return response.data;
     },
+    getByCategoryId: async (categoryId: number) => {
+        const response = await api.get<Product[]>(`/Product/category/${categoryId}`);
+        return response.data;
+    },
     getPagedHotDeals: async (pageNumber: number = 1, pageSize: number = 8) => {
         // Assume API format returns { items: Product[], totalCount: number, pageNumber: number, pageSize: number, totalPages: number }
         const response = await api.get<any>(`/Product/hot-deals/paged?pageNumber=${pageNumber}&pageSize=${pageSize}`);

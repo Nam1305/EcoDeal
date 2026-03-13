@@ -12,6 +12,7 @@ namespace EcoDeal.Api.Services
         Task<ProductDto> CreateProductAsync(CreateProductRequest request);
         Task<IEnumerable<ProductDto>> SearchProductsByNameAsync(string name);
         Task<IEnumerable<ProductDto>> GetProductsByStoreIdAsync(int storeId);
+        Task<IEnumerable<ProductDto>> GetProductsByCategoryIdAsync(int categoryId);
         Task UpdateProductAsync(int id, UpdateProductRequest request);
         Task DeleteProductAsync(int id);
     }

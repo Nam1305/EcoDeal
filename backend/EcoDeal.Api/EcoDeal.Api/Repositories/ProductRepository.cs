@@ -101,6 +101,15 @@ namespace EcoDeal.Api.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Product>> GetByCategoryIdAsync(int categoryId)
+        {
+            return await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Store)
+                .Where(p => p.CategoryId == categoryId && p.IsActive == true)
+                .ToListAsync();
+        }
+
         public async Task DeleteAsync(int id)
         {
             var product = await _context.Products.FindAsync(id);

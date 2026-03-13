@@ -2,7 +2,11 @@ import React, { useEffect, useState } from 'react';
 import categoryService from '../services/categoryService';
 import type { Category } from '../types';
 
-const CategoryList: React.FC = () => {
+interface CategoryListProps {
+    onCategoryClick?: (categoryId: number) => void;
+}
+
+const CategoryList: React.FC<CategoryListProps> = ({ onCategoryClick }) => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -33,6 +37,7 @@ const CategoryList: React.FC = () => {
                     {categories.map((category) => (
                         <div
                             key={category.categoryId}
+                            onClick={() => onCategoryClick?.(category.categoryId)}
                             className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer text-center group"
                         >
                             <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-green-100 transition">
