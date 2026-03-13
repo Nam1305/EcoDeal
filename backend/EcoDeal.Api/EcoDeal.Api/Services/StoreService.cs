@@ -1,6 +1,8 @@
 using EcoDeal.Api.DTOs;
 using EcoDeal.Api.Models;
 using EcoDeal.Api.Repositories;
+using EcoDeal.Api.Mappers;
+using EcoDeal.Api.Utils;
 
 namespace EcoDeal.Api.Services
 {
@@ -18,13 +20,13 @@ namespace EcoDeal.Api.Services
         public async Task<IEnumerable<StoreDto>> GetAllStoresAsync()
         {
             var stores = await _storeRepository.GetAllAsync();
-            return stores.Select(MapToDto);
+            return stores.Select(s => s.MapToDto());
         }
 
         public async Task<StoreDto?> GetStoreByIdAsync(int id)
         {
             var store = await _storeRepository.GetByIdAsync(id);
-            return store != null ? MapToDto(store) : null;
+            return store?.MapToDto();
         }
 
         public async Task<PagedResponse<StoreDto>> GetPagedStoresAsync(int pageNumber, int pageSize)
@@ -32,7 +34,7 @@ namespace EcoDeal.Api.Services
             var (items, totalCount) = await _storeRepository.GetPagedAsync(pageNumber, pageSize);
             return new PagedResponse<StoreDto>
             {
-                Items = items.Select(MapToDto),
+                Items = items.Select(s => s.MapToDto()),
                 TotalCount = totalCount,
                 PageNumber = pageNumber,
                 PageSize = pageSize
@@ -42,13 +44,13 @@ namespace EcoDeal.Api.Services
         public async Task<IEnumerable<StoreDto>> SearchStoresAsync(string name)
         {
             var stores = await _storeRepository.SearchByNameAsync(name);
-            return stores.Select(MapToDto);
+            return stores.Select(s => s.MapToDto());
         }
 
         public async Task<IEnumerable<StoreDto>> GetStoresByApprovalStatusAsync(bool isApproved)
         {
             var stores = await _storeRepository.GetByApprovalStatusAsync(isApproved);
-            return stores.Select(MapToDto);
+            return stores.Select(s => s.MapToDto());
         }
 
         public async Task<StoreDto> AddStoreAsync(CreateStoreRequest request, int userId)
@@ -64,7 +66,7 @@ namespace EcoDeal.Api.Services
             };
 
             var createdStore = await _storeRepository.AddAsync(store);
-            return MapToDto(createdStore);
+            return createdStore.MapToDto();
         }
 
         public async Task UpdateStoreAsync(int id, UpdateStoreRequest request)
@@ -94,7 +96,7 @@ namespace EcoDeal.Api.Services
         {
             var stores = await _storeRepository.GetAllAsync();
             var store = stores.FirstOrDefault(s => s.UserId == userId);
-            return store != null ? MapToDto(store) : null;
+            return store?.MapToDto();
         }
 
         public async Task<StoreDto> RegisterStoreAsync(StoreRegistrationDto dto, int userId)
@@ -120,7 +122,7 @@ namespace EcoDeal.Api.Services
             var createdStore = await _storeRepository.AddAsync(store);
 
             // User Role is NOT updated here anymore. It gets updated only when Admin approves.
-            return MapToDto(createdStore);
+            return createdStore.MapToDto();
         }
 
         public async Task<IEnumerable<StoreNearbyDto>> GetNearbyStoresAsync(double lat, double lon, double radiusKm)
@@ -132,52 +134,16 @@ namespace EcoDeal.Api.Services
             {
                 if (!store.Latitude.HasValue || !store.Longitude.HasValue) continue;
 
-                var distance = CalculateDistance(lat, lon, (double)store.Latitude.Value, (double)store.Longitude.Value);
+                var distance = GeoUtils.CalculateDistance(lat, lon, (double)store.Latitude.Value, (double)store.Longitude.Value);
                 if (distance <= radiusKm)
                 {
-                    var dto = MapToNearbyDto(store, distance);
-                    nearbyStores.Add(dto);
+                    var travelTime = CalculateTravelTime(distance);
+                    nearbyStores.Add(store.MapToNearbyDto(distance, travelTime));
                 }
             }
 
             return nearbyStores.OrderBy(s => s.Distance);
         }
-
-        private StoreNearbyDto MapToNearbyDto(Store store, double distance)
-        {
-            var baseDto = MapToDto(store);
-            return new StoreNearbyDto
-            {
-                StoreId = baseDto.StoreId,
-                UserId = baseDto.UserId,
-                StoreName = baseDto.StoreName,
-                Description = baseDto.Description,
-                StoreEmail = baseDto.StoreEmail,
-                StorePhone = baseDto.StorePhone,
-                ImageUrl = baseDto.ImageUrl,
-                Address = baseDto.Address,
-                Latitude = baseDto.Latitude,
-                Longitude = baseDto.Longitude,
-                IsApproved = baseDto.IsApproved,
-                OwnerName = baseDto.OwnerName,
-                Distance = Math.Round(distance, 2),
-                EstimatedTravelTime = CalculateTravelTime(distance)
-            };
-        }
-
-        private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
-        {
-            const double R = 6371; // Earth's radius in km
-            var dLat = ToRadians(lat2 - lat1);
-            var dLon = ToRadians(lon2 - lon1);
-            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
-                    Math.Cos(ToRadians(lat1)) * Math.Cos(ToRadians(lat2)) *
-                    Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
-            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
-            return R * c;
-        }
-
-        private double ToRadians(double angle) => Math.PI * angle / 180.0;
 
         private string CalculateTravelTime(double distance)
         {
@@ -188,25 +154,6 @@ namespace EcoDeal.Api.Services
 
             if (timeMinutes < 1) return "Less than 1 min";
             return $"{Math.Ceiling(timeMinutes)} mins";
-        }
-
-        private StoreDto MapToDto(Store store)
-        {
-            return new StoreDto
-            {
-                StoreId = store.StoreId,
-                UserId = store.UserId,
-                StoreName = store.StoreName,
-                Description = store.Description,
-                StoreEmail = store.StoreEmail,
-                StorePhone = store.StorePhone,
-                ImageUrl = store.ImageUrl,
-                Address = store.Address,
-                Latitude = store.Latitude,
-                Longitude = store.Longitude,
-                IsApproved = store.IsApproved,
-                OwnerName = store.User?.FullName ?? "Unknown"
-            };
         }
     }
 }
