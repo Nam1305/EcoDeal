@@ -4,10 +4,11 @@ import { useCart } from '../context/CartContext';
 import { orderService } from '../services/orderService';
 
 const Checkout: React.FC = () => {
-    const { cart } = useCart();
+    const { cart, fetchCart } = useCart();
     const navigate = useNavigate();
     const [address, setAddress] = useState('');
     const [phone, setPhone] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState<'Stripe' | 'COD'>('Stripe');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -26,14 +27,20 @@ const Checkout: React.FC = () => {
             const data = await orderService.checkout({
                 shippingAddress: address,
                 shippingPhone: phone,
+                paymentMethod: paymentMethod,
                 successUrl: `${domain}/checkout/success`,
                 cancelUrl: `${domain}/checkout/cancel`
             });
 
-            if (data.sessionUrl) {
+            if (data.isCod) {
+                // For COD, refresh cart (it's already cleared in DB)
+                await fetchCart();
+                // Redirect to success page with a flag
+                navigate('/checkout/success?payment_method=COD');
+            } else if (data.sessionUrl) {
                 window.location.href = data.sessionUrl; // Redirect to Stripe
             } else {
-                setError('Failed to initiate checkout with Stripe.');
+                setError('Failed to initiate checkout.');
             }
         } catch (err: any) {
             setError(err.response?.data?.message || 'An error occurred during checkout.');
@@ -80,6 +87,39 @@ const Checkout: React.FC = () => {
                         />
                     </div>
 
+                    <div className="mb-6">
+                        <label className="block text-gray-700 font-medium mb-3">Payment Method</label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <label className={`flex items-center p-4 border rounded-lg cursor-pointer transition ${paymentMethod === 'Stripe' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:bg-gray-50'}`}>
+                                <input 
+                                    type="radio" 
+                                    name="paymentMethod" 
+                                    className="hidden"
+                                    checked={paymentMethod === 'Stripe'}
+                                    onChange={() => setPaymentMethod('Stripe')}
+                                />
+                                <div className="flex flex-col">
+                                    <span className="font-bold text-gray-800">Credit Card (Stripe)</span>
+                                    <span className="text-xs text-gray-500">Pay securely with card</span>
+                                </div>
+                            </label>
+                            
+                            <label className={`flex items-center p-4 border rounded-lg cursor-pointer transition ${paymentMethod === 'COD' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:bg-gray-50'}`}>
+                                <input 
+                                    type="radio" 
+                                    name="paymentMethod" 
+                                    className="hidden"
+                                    checked={paymentMethod === 'COD'}
+                                    onChange={() => setPaymentMethod('COD')}
+                                />
+                                <div className="flex flex-col">
+                                    <span className="font-bold text-gray-800">Cash on Delivery (COD)</span>
+                                    <span className="text-xs text-gray-500">Pay when you receive items</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
                     <button 
                         type="submit" 
                         disabled={loading}
@@ -88,10 +128,12 @@ const Checkout: React.FC = () => {
                         {loading ? (
                             <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></span>
                         ) : (
-                            'Pay with Stripe'
+                            paymentMethod === 'Stripe' ? 'Proceed to Card Payment' : 'Place Order (COD)'
                         )}
                     </button>
-                    <p className="text-center text-sm text-gray-500 mt-2">You will be securely redirected to Stripe for payment.</p>
+                    <p className="text-center text-sm text-gray-500 mt-2">
+                        {paymentMethod === 'Stripe' ? 'You will be securely redirected to Stripe for payment.' : 'Confirming your order with Cash on Delivery.'}
+                    </p>
                 </form>
             </div>
         </div>

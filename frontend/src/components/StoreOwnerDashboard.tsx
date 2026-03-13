@@ -17,6 +17,7 @@ interface RecentOrderDto {
     customerName: string;
     storeTotalAmount: number;
     status: string;
+    paymentMethod: string;
 }
 
 interface TopProductDto {
@@ -143,7 +144,7 @@ const StoreOwnerDashboard: React.FC = () => {
                         <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                             <h2 className="text-lg font-bold text-gray-800">Order Management</h2>
                             <div className="flex gap-2">
-                                {['All', 'Paid', 'Approved', 'Shipped', 'Cancelled'].map(s => (
+                                {['All', 'Pending', 'Paid', 'Approved', 'Shipped', 'Cancelled'].map(s => (
                                     <button 
                                         key={s}
                                         onClick={() => setFilterStatus(s)}
@@ -186,7 +187,7 @@ const StoreOwnerDashboard: React.FC = () => {
                                                 </td>
                                                 <td className="px-6 py-4 text-center">
                                                     <div className="flex justify-center gap-2">
-                                                        {order.status === 'Paid' && (
+                                                        {(order.status === 'Paid' || (order.status === 'Pending' && order.paymentMethod === 'COD')) && (
                                                             <button 
                                                                 onClick={() => handleUpdateStatus(order.orderId, 'Approved')}
                                                                 className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition"

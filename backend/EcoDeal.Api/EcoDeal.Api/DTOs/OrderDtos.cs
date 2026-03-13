@@ -9,12 +9,15 @@ public class CheckoutRequest
     public string? ShippingPhone { get; set; }
     public string? SuccessUrl { get; set; }
     public string? CancelUrl { get; set; }
+    public string? PaymentMethod { get; set; } // "Stripe" or "COD"
 }
 
 public class CheckoutResponse
 {
     public string? SessionId { get; set; }
     public string? SessionUrl { get; set; }
+    public bool IsCod { get; set; }
+    public int? OrderId { get; set; }
 }
 
 public class OrderDto

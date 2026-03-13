@@ -31,77 +31,121 @@ public class OrderService : IOrderService
         if (cart == null || !cart.CartItems.Any())
             throw new Exception("Cart is empty.");
 
-        var lineItems = new List<SessionLineItemOptions>();
-
-        foreach (var item in cart.CartItems)
-        {
-            long priceInCent = (long)((item.Product.DiscountedPrice ?? item.Product.OriginalPrice ?? 0) * 100);
-            
-            lineItems.Add(new SessionLineItemOptions
-            {
-                PriceData = new SessionLineItemPriceDataOptions
-                {
-                    UnitAmount = priceInCent,
-                    Currency = "vnd", // Ensure this matches your expected currency
-                    ProductData = new SessionLineItemPriceDataProductDataOptions
-                    {
-                        Name = item.Product.ProductName,
-                    },
-                },
-                Quantity = item.Quantity.GetValueOrDefault(1),
-            });
-        }
-
-        var options = new SessionCreateOptions
-        {
-            PaymentMethodTypes = new List<string> { "card" },
-            LineItems = lineItems,
-            Mode = "payment",
-            SuccessUrl = request.SuccessUrl + "?session_id={CHECKOUT_SESSION_ID}",
-            CancelUrl = request.CancelUrl,
-        };
-
-        var service = new SessionService();
-        Session session = await service.CreateAsync(options);
-
-        // Pre-create Orders as Pending, grouped by StoreId
+        // Pre-create Orders, grouped by StoreId
         var groupedItems = cart.CartItems.GroupBy(ci => ci.Product.StoreId);
-        
-        foreach (var group in groupedItems)
+        string paymentMethod = request.PaymentMethod ?? "Stripe";
+        int? firstOrderId = null;
+
+        if (paymentMethod == "COD")
         {
-            var storeId = group.Key;
-            var items = group.ToList();
-            
-            var order = new Order
+            foreach (var group in groupedItems)
             {
-                UserId = userId,
-                StoreId = storeId,
-                OrderDate = DateTime.Now,
-                TotalAmount = items.Sum(c => (c.Product.DiscountedPrice ?? c.Product.OriginalPrice ?? 0) * c.Quantity),
-                Status = "Pending",
-                PaymentStatus = "Unpaid",
-                PaymentMethod = "Stripe",
-                StripeSessionId = session.Id,
-                ShippingAddress = request.ShippingAddress,
-                ShippingPhone = request.ShippingPhone,
-                OrderDetails = items.Select(ci => new OrderDetail
+                var storeId = group.Key;
+                var items = group.ToList();
+
+                var order = new Order
                 {
-                    ProductId = ci.ProductId,
-                    Quantity = ci.Quantity,
-                    UnitPrice = ci.Product.DiscountedPrice ?? ci.Product.OriginalPrice ?? 0
-                }).ToList()
+                    UserId = userId,
+                    StoreId = storeId,
+                    OrderDate = DateTime.Now,
+                    TotalAmount = items.Sum(c => (c.Product.DiscountedPrice ?? c.Product.OriginalPrice ?? 0) * c.Quantity),
+                    Status = "Pending",
+                    PaymentStatus = "Unpaid",
+                    PaymentMethod = "COD",
+                    ShippingAddress = request.ShippingAddress,
+                    ShippingPhone = request.ShippingPhone,
+                    OrderDetails = items.Select(ci => new OrderDetail
+                    {
+                        ProductId = ci.ProductId,
+                        Quantity = ci.Quantity,
+                        UnitPrice = ci.Product.DiscountedPrice ?? ci.Product.OriginalPrice ?? 0
+                    }).ToList()
+                };
+
+                await _orderRepository.CreateOrderAsync(order);
+                if (firstOrderId == null) firstOrderId = order.OrderId;
+            }
+
+            // Clear cart immediately for COD
+            await _cartRepository.ClearCartAsync(cart.CartId);
+
+            return new CheckoutResponse
+            {
+                IsCod = true,
+                OrderId = firstOrderId
+            };
+        }
+        else
+        {
+            // Stripe flow (Default)
+            var lineItems = new List<SessionLineItemOptions>();
+
+            foreach (var item in cart.CartItems)
+            {
+                long priceInCent = (long)((item.Product.DiscountedPrice ?? item.Product.OriginalPrice ?? 0) * 100);
+
+                lineItems.Add(new SessionLineItemOptions
+                {
+                    PriceData = new SessionLineItemPriceDataOptions
+                    {
+                        UnitAmount = priceInCent,
+                        Currency = "vnd",
+                        ProductData = new SessionLineItemPriceDataProductDataOptions
+                        {
+                            Name = item.Product.ProductName,
+                        },
+                    },
+                    Quantity = item.Quantity.GetValueOrDefault(1),
+                });
+            }
+
+            var options = new SessionCreateOptions
+            {
+                PaymentMethodTypes = new List<string> { "card" },
+                LineItems = lineItems,
+                Mode = "payment",
+                SuccessUrl = request.SuccessUrl + "?session_id={CHECKOUT_SESSION_ID}",
+                CancelUrl = request.CancelUrl,
             };
 
-            await _orderRepository.CreateOrderAsync(order);
+            var service = new SessionService();
+            Session session = await service.CreateAsync(options);
+
+            foreach (var group in groupedItems)
+            {
+                var storeId = group.Key;
+                var items = group.ToList();
+
+                var order = new Order
+                {
+                    UserId = userId,
+                    StoreId = storeId,
+                    OrderDate = DateTime.Now,
+                    TotalAmount = items.Sum(c => (c.Product.DiscountedPrice ?? c.Product.OriginalPrice ?? 0) * c.Quantity),
+                    Status = "Pending",
+                    PaymentStatus = "Unpaid",
+                    PaymentMethod = "Stripe",
+                    StripeSessionId = session.Id,
+                    ShippingAddress = request.ShippingAddress,
+                    ShippingPhone = request.ShippingPhone,
+                    OrderDetails = items.Select(ci => new OrderDetail
+                    {
+                        ProductId = ci.ProductId,
+                        Quantity = ci.Quantity,
+                        UnitPrice = ci.Product.DiscountedPrice ?? ci.Product.OriginalPrice ?? 0
+                    }).ToList()
+                };
+
+                await _orderRepository.CreateOrderAsync(order);
+            }
+
+            return new CheckoutResponse
+            {
+                SessionId = session.Id,
+                SessionUrl = session.Url,
+                IsCod = false
+            };
         }
-
-        // Do not clear cart yet, wait until webhook or success page confirms payment.
-
-        return new CheckoutResponse
-        {
-            SessionId = session.Id,
-            SessionUrl = session.Url
-        };
     }
 
     public async Task<OrderDto> CreateOrderFromSessionAsync(string sessionId)

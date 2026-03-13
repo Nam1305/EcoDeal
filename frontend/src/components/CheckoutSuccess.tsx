@@ -6,17 +6,24 @@ import { orderService } from '../services/orderService';
 const CheckoutSuccess: React.FC = () => {
     const [searchParams] = useSearchParams();
     const sessionId = searchParams.get('session_id');
+    const paymentMethod = searchParams.get('payment_method');
     const navigate = useNavigate();
     const { fetchCart } = useCart();
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
 
     useEffect(() => {
-        if (!sessionId) {
+        if (!sessionId && paymentMethod !== 'COD') {
             navigate('/');
             return;
         }
 
+        if (paymentMethod === 'COD') {
+            setStatus('success');
+            return;
+        }
+
         const confirmOrder = async () => {
+            if (!sessionId) return;
             try {
                 // Call backend to verify and mark order as Paid
                 await orderService.confirmPayment(sessionId);

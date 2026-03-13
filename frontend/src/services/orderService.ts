@@ -1,7 +1,13 @@
 import api from './api';
 
 export const orderService = {
-    checkout: async (data: { shippingAddress: string, shippingPhone: string, successUrl: string, cancelUrl: string }) => {
+    checkout: async (data: { 
+        shippingAddress: string, 
+        shippingPhone: string, 
+        successUrl: string, 
+        cancelUrl: string,
+        paymentMethod: string 
+    }) => {
         const response = await api.post('/order/checkout', data);
         return response.data;
     },
