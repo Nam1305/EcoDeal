@@ -1,107 +1,99 @@
 using EcoDeal.Api.DTOs;
 using EcoDeal.Api.Models;
-using Microsoft.EntityFrameworkCore;
+using EcoDeal.Api.Repositories;
 
 namespace EcoDeal.Api.Services;
 
 public class AdminService : IAdminService
 {
-    private readonly EcoDealContext _context;
+    private readonly IAdminRepository _adminRepository;
+    private readonly IStoreRepository _storeRepository;
+    private readonly IUserRepository _userRepository;
 
-    public AdminService(EcoDealContext context)
+    public AdminService(IAdminRepository adminRepository, IStoreRepository storeRepository, IUserRepository userRepository)
     {
-        _context = context;
+        _adminRepository = adminRepository;
+        _storeRepository = storeRepository;
+        _userRepository = userRepository;
     }
 
     public async Task<AdminStatsDto> GetAdminStatsAsync()
     {
-        var totalUsers = await _context.Users.CountAsync();
-        var totalStores = await _context.Stores.CountAsync();
-        var totalOrders = await _context.Orders.CountAsync();
-        var totalRevenue = await _context.Orders
-            .Where(o => o.PaymentStatus == "Completed" || o.PaymentStatus == "Paid")
-            .SumAsync(o => o.TotalAmount ?? 0);
-        
-        var pendingApprovals = await _context.Stores.CountAsync(s => s.IsApproved == false);
-
         return new AdminStatsDto
         {
-            TotalUsers = totalUsers,
-            TotalStores = totalStores,
-            TotalOrders = totalOrders,
-            TotalRevenue = totalRevenue,
-            PendingStoreApprovals = pendingApprovals
+            TotalUsers = await _adminRepository.GetTotalUsersCountAsync(),
+            TotalStores = await _adminRepository.GetTotalStoresCountAsync(),
+            TotalOrders = await _adminRepository.GetTotalOrdersCountAsync(),
+            TotalRevenue = await _adminRepository.GetTotalRevenueAsync(),
+            PendingStoreApprovals = await _adminRepository.GetPendingStoreApprovalsCountAsync()
         };
     }
 
     public async Task<IEnumerable<AdminStoreDto>> GetPendingStoresAsync()
     {
-        return await _context.Stores
-            .Where(s => s.IsApproved == false)
-            .Include(s => s.User)
-            .Select(s => new AdminStoreDto
-            {
-                StoreId = s.StoreId,
-                StoreName = s.StoreName,
-                OwnerName = s.User.FullName,
-                StoreEmail = s.StoreEmail,
-                StorePhone = s.StorePhone,
-                IsApproved = s.IsApproved
-            })
-            .ToListAsync();
+        var stores = await _adminRepository.GetPendingStoresWithUserAsync();
+        return stores.Select(s => new AdminStoreDto
+        {
+            StoreId = s.StoreId,
+            StoreName = s.StoreName,
+            OwnerName = s.User?.FullName ?? "Unknown",
+            StoreEmail = s.StoreEmail,
+            StorePhone = s.StorePhone,
+            IsApproved = s.IsApproved
+        });
     }
 
     public async Task<bool> ApproveStoreAsync(int storeId)
     {
-        var store = await _context.Stores.Include(s => s.User).FirstOrDefaultAsync(s => s.StoreId == storeId);
+        var store = await _storeRepository.GetByIdAsync(storeId);
         if (store == null) return false;
 
         store.IsApproved = true;
 
-        if (store.User != null && store.User.Role != "StoreOwner")
+        if (store.UserId != 0)
         {
-            store.User.Role = "StoreOwner";
+            var user = await _userRepository.GetByIdAsync(store.UserId);
+            if (user != null && user.Role != "StoreOwner")
+            {
+                user.Role = "StoreOwner";
+                await _userRepository.UpdateAsync(user);
+            }
         }
 
-        await _context.SaveChangesAsync();
+        await _storeRepository.UpdateAsync(store);
         return true;
     }
 
     public async Task<bool> RejectStoreAsync(int storeId)
     {
-        var store = await _context.Stores.FindAsync(storeId);
+        var store = await _storeRepository.GetByIdAsync(storeId);
         if (store == null) return false;
 
-        // Xóa yêu cầu đăng ký nếu Reject
-        _context.Stores.Remove(store);
-        await _context.SaveChangesAsync();
+        await _storeRepository.DeleteAsync(storeId);
         return true; 
     }
 
     public async Task<IEnumerable<UserProfileDto>> GetAllUsersAsync()
     {
-        return await _context.Users
-            .Select(u => new UserProfileDto
-            {
-                UserId = u.UserId,
-                FullName = u.FullName,
-                Email = u.Email,
-                PhoneNumber = u.PhoneNumber,
-                Address = u.Address,
-                Latitude = u.Latitude,
-                Longitude = u.Longitude,
-                Role = u.Role
-            })
-            .ToListAsync();
+        var users = await _adminRepository.GetUsersAsync();
+        return users.Select(u => new UserProfileDto
+        {
+            UserId = u.UserId,
+            FullName = u.FullName,
+            Email = u.Email,
+            PhoneNumber = u.PhoneNumber,
+            Address = u.Address,
+            Latitude = u.Latitude,
+            Longitude = u.Longitude,
+            Role = u.Role
+        });
     }
 
     public async Task<IEnumerable<MonthlyGrowthDto>> GetMonthlyGrowthAsync(int months = 6)
     {
         var startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddMonths(-months + 1);
 
-        var orders = await _context.Orders
-            .Where(o => o.OrderDate >= startDate)
-            .ToListAsync();
+        var orders = await _adminRepository.GetOrdersSinceAsync(startDate);
 
         var grouped = orders
             .GroupBy(o => new { o.OrderDate!.Value.Year, o.OrderDate.Value.Month })
