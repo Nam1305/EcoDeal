@@ -22,6 +22,8 @@ public partial class User
     public decimal? Latitude { get; set; }
 
     public decimal? Longitude { get; set; }
+    public string? ResetToken { get; set; }
+    public DateTime? ResetTokenExpires { get; set; }
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 

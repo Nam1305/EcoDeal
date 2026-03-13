@@ -29,6 +29,16 @@ const authService = {
         const userStr = localStorage.getItem('user');
         if (userStr) return JSON.parse(userStr);
         return null;
+    },
+
+    forgotPassword: async (data: { email: string }) => {
+        const response = await api.post('/Auth/forgot-password', data);
+        return response.data;
+    },
+
+    resetPassword: async (data: { token: string; newPassword: string }) => {
+        const response = await api.post('/Auth/reset-password', data);
+        return response.data;
     }
 };
 

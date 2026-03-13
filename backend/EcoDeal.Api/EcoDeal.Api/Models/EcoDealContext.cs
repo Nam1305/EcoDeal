@@ -211,6 +211,8 @@ public partial class EcoDealContext : DbContext
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
             entity.Property(e => e.PhoneNumber).HasMaxLength(20);
             entity.Property(e => e.Role).HasMaxLength(50);
+            entity.Property(e => e.ResetToken).HasMaxLength(255);
+            entity.Property(e => e.ResetTokenExpires).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<Review>(entity =>

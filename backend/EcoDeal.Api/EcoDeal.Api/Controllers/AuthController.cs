@@ -1,4 +1,4 @@
-﻿using EcoDeal.Api.DTOs;
+using EcoDeal.Api.DTOs;
 using EcoDeal.Api.Services;
 
 using Microsoft.AspNetCore.Mvc;
@@ -54,6 +54,37 @@ namespace EcoDeal.Api.Controllers
             }
 
             return Ok(response);
+        }
+
+        //Forgot password
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var (success, message) = await _authService.ForgotPasswordAsync(request.Email);
+            return Ok(new { message });
+        }
+
+        //Reset password
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var (success, message) = await _authService.ResetPasswordAsync(request);
+            if (!success)
+            {
+                return BadRequest(new { message });
+            }
+
+            return Ok(new { message });
         }
     }
 }

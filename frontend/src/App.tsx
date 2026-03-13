@@ -20,6 +20,8 @@ import RegisterStore from './components/RegisterStore';
 import NearbyStores from './components/NearbyStores';
 import StoreSettings from './components/StoreSettings';
 import AdminDashboard from './components/AdminDashboard';
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
 import 'leaflet/dist/leaflet.css';
 import './App.css';
 
@@ -59,6 +61,8 @@ function App() {
                 <Route path="/nearby" element={<NearbyStores />} />
                 <Route path="/admin-dashboard" element={<AdminDashboard />} />
                 <Route path="/deals" element={<HotDeals />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password/:token" element={<ResetPassword />} />
               </Routes>
             </main>
           </div>
